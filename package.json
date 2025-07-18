@@ -42,6 +42,7 @@
     "prepare": "simple-git-hooks"
   },
   "dependencies": {
+    "ali-oss": "^6.23.0",
     "c12": "^3.1.0",
     "cac": "^6.7.14",
     "tinyglobby": "^0.2.14"
