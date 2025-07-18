@@ -21,10 +21,16 @@
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
+  "bin": {
+    "ossx": "./bin/ossx.mjs"
+  },
   "files": [
     "bin",
     "dist"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "unbuild",
     "dev": "unbuild --stub",
@@ -35,6 +41,11 @@
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
   },
+  "dependencies": {
+    "c12": "^3.1.0",
+    "cac": "^6.7.14",
+    "tinyglobby": "^0.2.14"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:cli",
     "@antfu/ni": "catalog:cli",
@@ -43,7 +54,6 @@
     "bumpp": "catalog:cli",
     "eslint": "catalog:cli",
     "lint-staged": "catalog:cli",
-    "minimist": "catalog:cli",
     "simple-git-hooks": "catalog:cli",
     "tinyexec": "catalog:utils",
     "tsx": "catalog:cli",
