@@ -1,18 +1,52 @@
-export type Platform = 'Ali-OSS' | 'Tencent-OSS' | 'Custom'
+export type Uploader = (filePath: string, options: OssOptions) => Promise<void>
+
+export interface AliyunOSSProvider {
+  name: 'aliyun-oss'
+  accessKeyId: string
+  accessKeySecret: string
+  bucket: string
+  area: string
+}
+
+export interface TencentCloudCOS {
+  name: 'tencent-cloud-cos'
+  secretId: string
+  secretKey: string
+  bucket: string
+  appId: string
+  area: string
+}
+
+export type Provider = AliyunOSSProvider | TencentCloudCOS
 
 export interface OssOptions {
   /**
-   * OSS platform
+   * OSS service provider
    */
-  platform: Platform
+  provider: Provider
 
   /**
-   * OSS Upload target directory
+   * Local directory path where files will be uploaded
    */
   target: string
 
   /**
-   * Oss configuration
+   * Remote directory path where files will be uploaded from
    */
-  config: Record<string, any> | (() => Promise<Record<string, any>> | Record<string, any>)
+  destination: string
+
+  /**
+   * Ignore files during upload, support glob patterns
+   */
+  ignoreFiles?: string[]
+
+  /**
+   * Function to transform the file path before uploading
+   */
+  onBeforeUpload?: (filePath: string) => string | undefined
+
+  /**
+   * Function to execute after the file has been uploaded
+   */
+  onAfterUpload?: (filePath: string) => void
 }
