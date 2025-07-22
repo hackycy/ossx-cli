@@ -2,11 +2,11 @@ import type { OssOptions } from './types'
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import mime from 'mime-types'
 import { glob } from 'tinyglobby'
 import { createUploader } from './providers'
 
 export async function uploadOSS(options: OssOptions): Promise<void> {
-  // Validate options
   if (!options.provider) {
     throw new Error('Provider is required')
   }
@@ -43,9 +43,6 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
     absolute: false,
   })
 
-  console.log(`Found ${files.length} files to upload`)
-
-  // Upload each file
   for (const file of files) {
     // Skip directories
     const localFilePath = path.join(targetDir, file)
@@ -53,6 +50,10 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
     if (stat.isDirectory()) {
       continue
     }
+
+    const filename = path.basename(localFilePath)
+    const mimeType = mime.lookup(filename)
+    const contentType = mime.contentType(filename)
 
     // Calculate the remote path - OSS always uses forward slashes (/) regardless of OS
     // Normalize the path to ensure consistent handling across platforms
@@ -62,7 +63,13 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
       : `${options.destination}/${normalizedPath}`
 
     // Upload the file using the provider's strategy
-    await uploader.uploadFile(localFilePath, remoteFilePath, options)
+    await uploader.uploadFile({
+      localFilePath,
+      remoteFilePath,
+      filename,
+      mimeType: mimeType || undefined,
+      contentType: contentType || undefined,
+    }, options)
   }
 
   console.log('Upload completed successfully')

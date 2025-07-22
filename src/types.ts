@@ -17,7 +17,20 @@ export interface TencentCloudCOS {
   area: string
 }
 
-export type Provider = AliyunOSSProvider | TencentCloudCOS
+export interface CustomProvider {
+  name: 'custom'
+  upload: (file: OSSFile, options: OssOptions) => Promise<void>
+}
+
+export type Provider = AliyunOSSProvider | TencentCloudCOS | CustomProvider
+
+export interface OSSFile {
+  filename: string
+  localFilePath: string
+  remoteFilePath: string
+  mimeType?: string
+  contentType?: string
+}
 
 /**
  * Interface for all OSS provider implementations
@@ -25,11 +38,10 @@ export type Provider = AliyunOSSProvider | TencentCloudCOS
 export interface OSSUploader {
   /**
    * Upload a single file to OSS
-   * @param localFilePath Path to the local file
-   * @param remoteFilePath Path where the file will be stored in OSS
+   * @param file file
    * @param options Additional upload options
    */
-  uploadFile: (localFilePath: string, remoteFilePath: string, options: OssOptions) => Promise<void>
+  uploadFile: (file: OSSFile, options: OssOptions) => Promise<void>
 }
 
 export interface OssOptions {

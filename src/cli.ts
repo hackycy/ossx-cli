@@ -1,3 +1,9 @@
+import { loadOssConfig } from './config'
+import { uploadOSS } from './upload'
+
 export async function bootstrap(): Promise<void> {
-  console.log('Bootstrap function called')
+  const cfg = await loadOssConfig()
+  await uploadOSS(cfg)
 }
+
+bootstrap()
