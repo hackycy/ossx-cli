@@ -1,11 +1,26 @@
-import type { AliyunOSSProvider, OSSFile, OssOptions, OSSUploader } from '../types'
+import type { AliyunOSSProvider, IUploadContext, OSSUploader } from '../types'
 import crypto from 'node:crypto'
 
 export class AliyunOSSUploader implements OSSUploader {
   constructor(private readonly provider: AliyunOSSProvider) { }
 
-  async uploadFile(_file: OSSFile, _options: OssOptions): Promise<void> {
-    // TODO
+  async uploadFile(ctx: IUploadContext): Promise<void> {
+    const { request, file } = ctx
+    if (!file.mimeType) {
+      throw new Error(`No mime type found for file ${file.filename}`)
+    }
+
+    const signature = this.generateSignature(ctx.file.remoteFilePath, file.mimeType)
+    request.request({
+      method: 'PUT',
+      url: `https://${this.provider.bucket}.${this.provider.area}.aliyuncs.com/${encodeURI(file.remoteFilePath)}`,
+      headers: {
+        'Host': `${this.provider.bucket}.${this.provider.area}.aliyuncs.com`,
+        'Authorization': signature,
+        'Date': new Date().toUTCString(),
+        'Content-Type': file.contentType!,
+      },
+    })
   }
 
   private generateSignature(path: string, mimeType: string): string {

@@ -19,8 +19,6 @@ catalogs:
     '@antfu/utils': ^9.1.0
   types:
     '@types/node': ^22.13.10
-  utils:
-    tinyexec: ^0.3.2
 onlyBuiltDependencies:
   - esbuild
   - simple-git-hooks

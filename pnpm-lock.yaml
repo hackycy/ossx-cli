@@ -44,10 +44,6 @@ catalogs:
     '@types/node':
       specifier: ^22.13.10
       version: 22.13.10
-  utils:
-    tinyexec:
-      specifier: ^0.3.2
-      version: 0.3.2
 
 importers:
 
@@ -102,9 +98,6 @@ importers:
       simple-git-hooks:
         specifier: catalog:cli
         version: 2.11.1
-      tinyexec:
-        specifier: catalog:utils
-        version: 0.3.2
       tsx:
         specifier: catalog:cli
         version: 4.19.3

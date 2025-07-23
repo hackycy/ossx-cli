@@ -4,6 +4,7 @@ import { loadConfig } from 'c12'
 
 const defaultOssOptions: Partial<OssOptions> = {
   target: 'dist',
+  destination: '/',
 }
 
 export async function loadOssConfig(overrides?: Partial<OssOptions>, cwd = process.cwd()): Promise<OssOptions> {

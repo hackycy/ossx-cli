@@ -37,7 +37,7 @@
     "lint": "eslint",
     "prepublishOnly": "nr build",
     "release": "bumpp",
-    "ossx": "tsx src/cli.ts",
+    "ossx": "tsx src/cli-run.ts",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
   },
@@ -60,7 +60,6 @@
     "eslint": "catalog:cli",
     "lint-staged": "catalog:cli",
     "simple-git-hooks": "catalog:cli",
-    "tinyexec": "catalog:utils",
     "tsx": "catalog:cli",
     "typescript": "catalog:cli",
     "unbuild": "catalog:cli",

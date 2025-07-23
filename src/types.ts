@@ -1,9 +1,20 @@
+import type { AxiosRequestConfig, AxiosResponse } from 'axios'
+
+export interface IRequest {
+  request: <T, U>(config: AxiosRequestConfig<U>) => Promise<AxiosResponse<T, U>>
+}
+
 export interface OSSFile {
   filename: string
   localFilePath: string
   remoteFilePath: string
   mimeType?: string
   contentType?: string
+}
+
+export interface IUploadContext {
+  file: OSSFile
+  request: IRequest
 }
 
 /**
@@ -15,7 +26,7 @@ export interface OSSUploader {
    * @param file file
    * @param options Additional upload options
    */
-  uploadFile: (file: OSSFile, options: OssOptions) => PromiseLike<void> | void
+  uploadFile: (ctx: IUploadContext) => PromiseLike<void> | void
 }
 
 export interface AliyunOSSProvider {

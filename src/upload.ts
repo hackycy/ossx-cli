@@ -5,6 +5,7 @@ import process from 'node:process'
 import mime from 'mime-types'
 import { glob } from 'tinyglobby'
 import { createUploader } from './providers'
+import Request from './request'
 import { isNil } from './utils'
 
 export async function uploadOSS(options: OssOptions): Promise<void> {
@@ -44,6 +45,9 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
     absolute: false,
   })
 
+  // network request
+  const request = new Request()
+
   for (const globFile of globFiles) {
     // Skip directories
     const localFilePath = path.join(targetDir, globFile)
@@ -81,7 +85,10 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
     }
 
     // Upload the file using the provider's strategy
-    await uploader.uploadFile(file, options)
+    await uploader.uploadFile({
+      file,
+      request,
+    })
   }
 
   console.log('Upload completed successfully')
