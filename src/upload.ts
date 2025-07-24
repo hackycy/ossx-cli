@@ -84,26 +84,36 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
       }
     }
 
+    let uploadError: unknown | undefined
+
     // Upload the file using the provider's strategy
     try {
-      if (isFunction(options.onProgress)) {
-        options.onProgress(file, i + 1, globFiles.length)
-      }
-
       await uploader.uploadFile({
         file,
         request,
       })
 
-      if (isFunction(options.onComplete)) {
-        options.onComplete(file)
+      if (options.removeWhenUploaded) {
+        try {
+          fs.rmSync(localFilePath, { force: true })
+        }
+        catch {
+          // ignore
+        }
       }
     }
     catch (error) {
       failCount++
-
-      if (isFunction(options.onComplete)) {
-        options.onComplete(file, error)
+      uploadError = error
+    }
+    finally {
+      if (isFunction(options.onProgress)) {
+        try {
+          options.onProgress(file, i + 1, globFiles.length, uploadError)
+        }
+        catch {
+          // ignore
+        }
       }
     }
   }

@@ -86,8 +86,7 @@ export type Provider = AliyunOSSProvider | TencentCloudCOS | CustomProvider
 
 export interface IUploadEvent {
   onStart?: (total: number) => void
-  onProgress?: (file: OSSFile, current: number, total: number) => void
-  onComplete?: (file: OSSFile, error?: unknown) => void
+  onProgress?: (file: OSSFile, current: number, total: number, error?: unknown) => void
   onFinish?: (total: number, fail: number) => void
 }
 
@@ -125,4 +124,10 @@ export interface OssOptions extends IUploadEvent {
    * Ignore files during upload, support glob patterns
    */
   ignoreFiles?: string[] | ((file: OSSFile) => PromiseLike<boolean | undefined> | boolean | undefined)
+
+  /**
+   * Remove files from local after successful upload
+   * @default false
+   */
+  removeWhenUploaded?: boolean
 }

@@ -22,7 +22,7 @@ export async function bootstrap(): Promise<void> {
     const bar = new CliProgress.SingleBar({
       format: `${ansis.cyanBright('⚡')} ${ansis.bold('Uploading')} ${ansis.yellowBright(`{total} files`)} ${ansis.dim('|')} ${ansis.magentaBright('{bar}')} ${ansis.dim('|')} ${ansis.yellowBright('{percentage}%')} ${ansis.dim('|')} ${ansis.dim(`#{value}`)} ${ansis.greenBright('{filename}')}`,
       hideCursor: true,
-      clearOnComplete: false,
+      clearOnComplete: true,
       barsize: 40,
     }, CliProgress.Presets.shades_classic)
 
@@ -38,21 +38,15 @@ export async function bootstrap(): Promise<void> {
           cfg.onStart(total)
         }
       },
-      onProgress: async (file: OSSFile, current: number, total: number): Promise<void> => {
+      onProgress: async (file: OSSFile, current: number, total: number, error?: unknown): Promise<void> => {
         bar.update(current, { filename: file.filename })
 
         if (isFunction(cfg.onProgress)) {
-          cfg.onProgress(file, current, total)
-        }
-      },
-      onComplete: async (file: OSSFile, error: unknown): Promise<void> => {
-        if (isFunction(cfg.onComplete)) {
-          cfg.onComplete(file, error)
+          cfg.onProgress(file, current, total, error)
         }
       },
       onFinish: async (total: number, fail: number): Promise<void> => {
         bar.stop()
-        console.log()
         console.log(`✨ Upload completed: ${ansis.cyan(total)} files processed, ${ansis.yellow(fail)} failed.`)
 
         if (isFunction(cfg.onFinish)) {
