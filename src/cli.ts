@@ -20,7 +20,7 @@ export async function bootstrap(): Promise<void> {
     const cfg = await loadOssConfig()
 
     const bar = new CliProgress.SingleBar({
-      format: `Progress | ${ansis.cyan('{bar}')} | {filename} | {value}/{total}`,
+      format: `Progress | ${ansis.greenBright('{bar}')} | ${ansis.blue('{value}')} ${ansis.dim('/')} ${ansis.blueBright('{total}')} | {filename}`,
       hideCursor: true,
       clearOnComplete: false,
     }, CliProgress.Presets.shades_classic)

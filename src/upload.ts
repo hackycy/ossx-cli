@@ -96,7 +96,6 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
       }
     }
     catch (error) {
-      console.error(`Failed to upload file ${file.filename}:`, error)
       failCount++
 
       if (isFunction(options.onComplete)) {
