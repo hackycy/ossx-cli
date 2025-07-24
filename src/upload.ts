@@ -6,7 +6,7 @@ import mime from 'mime-types'
 import { glob } from 'tinyglobby'
 import { createUploader } from './providers'
 import Request from './request'
-import { combineURLs, isNil } from './utils'
+import { combineURLs, isFunction, isNil } from './utils'
 
 export async function uploadOSS(options: OssOptions): Promise<void> {
   if (!options.provider) {
@@ -41,11 +41,13 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
     absolute: false,
   })
 
+  let failCount = 0
+
   // network request
   const request = new Request()
 
-  for (const globFile of globFiles) {
-    // Skip directories
+  for (let i = 0; i < globFiles.length; i++) {
+    const globFile = globFiles[i]
     const localFilePath = path.join(targetDir, globFile)
     const stat = fs.statSync(localFilePath)
     if (stat.isDirectory()) {
@@ -73,17 +75,37 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
       const pass = await options.ignoreFiles(file)
 
       if (!isNil(pass) && !pass) {
-        // ignore this file
+        // pass
         continue
       }
     }
 
     // Upload the file using the provider's strategy
-    await uploader.uploadFile({
-      file,
-      request,
-    })
+    try {
+      if (isFunction(options.onProgress)) {
+        options.onProgress(file, i + 1, globFiles.length)
+      }
+
+      await uploader.uploadFile({
+        file,
+        request,
+      })
+
+      if (isFunction(options.onComplete)) {
+        options.onComplete(file)
+      }
+    }
+    catch (error) {
+      console.error(`Failed to upload file ${file.filename}:`, error)
+      failCount++
+
+      if (isFunction(options.onComplete)) {
+        options.onComplete(file, error)
+      }
+    }
   }
 
-  console.log('Upload completed successfully')
+  if (isFunction(options.onFinish)) {
+    options.onFinish(globFiles.length, failCount)
+  }
 }

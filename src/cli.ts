@@ -1,6 +1,10 @@
+import type { OSSFile } from './types'
 import process from 'node:process'
+import ansis from 'ansis'
+import CliProgress from 'cli-progress'
 import { loadOssConfig } from './config'
 import { uploadOSS } from './upload'
+import { clearScreen, isFunction } from './utils'
 
 export enum ExitCode {
   Success = 0,
@@ -14,7 +18,44 @@ export async function bootstrap(): Promise<void> {
     process.on('unhandledRejection', errorHandler)
 
     const cfg = await loadOssConfig()
-    await uploadOSS(cfg)
+
+    const bar = new CliProgress.SingleBar({
+      format: `Progress | ${ansis.cyan('{bar}')} | {filename} | {value}/{total}`,
+      hideCursor: true,
+      clearOnComplete: false,
+    }, CliProgress.Presets.shades_classic)
+
+    await uploadOSS({
+      ...cfg,
+      onProgress: async (file: OSSFile, current: number, total: number): Promise<void> => {
+        if (current === 1) {
+          clearScreen()
+          console.log(ansis.cyanBright(`OSSX CLI`))
+          bar.start(total, 1, { filename: file.filename })
+        }
+        else {
+          bar.update(current, { filename: file.filename })
+        }
+
+        if (isFunction(cfg.onProgress)) {
+          cfg.onProgress(file, current, total)
+        }
+      },
+      onComplete: async (file: OSSFile, error: unknown): Promise<void> => {
+        if (isFunction(cfg.onComplete)) {
+          cfg.onComplete(file, error)
+        }
+      },
+      onFinish: async (total: number, fail: number): Promise<void> => {
+        bar.stop()
+        console.log()
+        console.log(`✨ Upload completed: ${ansis.cyan(total)} files processed, ${ansis.yellow(fail)} failed.`)
+
+        if (isFunction(cfg.onFinish)) {
+          cfg.onFinish(total, fail)
+        }
+      },
+    })
   }
   catch (error) {
     errorHandler(error as Error)

@@ -33,7 +33,14 @@ export interface AliyunOSSProvider {
   name: 'aliyun-oss'
   accessKeyId: string
   accessKeySecret: string
+  /**
+   * 存储空间（Bucket）
+   */
   bucket: string
+  /**
+   * OSS 地域（Region）
+   * @href https://help.aliyun.com/zh/oss/user-guide/regions-and-endpoints
+   */
   area: string
 }
 
@@ -53,7 +60,13 @@ export interface CustomProvider {
 
 export type Provider = AliyunOSSProvider | TencentCloudCOS | CustomProvider
 
-export interface OssOptions {
+export interface IUploadEvent {
+  onProgress?: (file: OSSFile, current: number, total: number) => void
+  onComplete?: (file: OSSFile, error?: unknown) => void
+  onFinish?: (total: number, fail: number) => void
+}
+
+export interface OssOptions extends IUploadEvent {
   /**
    * OSS service provider
    */

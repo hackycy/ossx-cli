@@ -14,7 +14,7 @@ export class AliyunOSSUploader implements OSSUploader {
     const signature = this.generateSignature(file.remoteFilePath, file.mimeType)
     const buffer = fs.readFileSync(file.localFilePath)
 
-    await request.request({
+    const result = await request.request({
       method: 'PUT',
       url: `https://${this.provider.bucket}.${this.provider.area}.aliyuncs.com/${encodeURI(file.remoteFilePath)}`,
       headers: {
@@ -25,6 +25,10 @@ export class AliyunOSSUploader implements OSSUploader {
       },
       data: buffer,
     })
+
+    if (result.status !== 200) {
+      throw new Error('Upload failed')
+    }
   }
 
   private generateSignature(path: string, mimeType: string): string {
