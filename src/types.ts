@@ -52,10 +52,15 @@ export interface AliyunOSSProvider {
   bucket: string
 
   /**
-   * OSS 专用地域ID (Region)
+   * 外网Endpoint e.g. oss-cn-hangzhou.aliyuncs.com
+   */
+  endpoint?: string
+
+  /**
+   * OSS 专用地域ID (Region) e.g. oss-cn-shenzhen
    * @href https://help.aliyun.com/zh/oss/user-guide/regions-and-endpoints
    */
-  region: string
+  region?: string
 
   /**
    * instruct OSS client to use HTTPS (secure: true) or HTTP (secure: false) protocol.

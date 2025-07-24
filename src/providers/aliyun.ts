@@ -14,11 +14,13 @@ export class AliyunOSSUploader implements OSSUploader {
     const signature = this.generateSignature(file.remoteFilePath, file.mimeType)
     const buffer = fs.readFileSync(file.localFilePath)
 
+    const endpoint = this.provider.endpoint || `${this.provider.region}.aliyuncs.com`
+
     const result = await request.request({
       method: 'PUT',
-      url: `${this.provider.secure ? 'https' : 'http'}://${this.provider.bucket}.${this.provider.region}.aliyuncs.com/${encodeURI(file.remoteFilePath)}`,
+      url: `${this.provider.secure ? 'https' : 'http'}://${this.provider.bucket}.${endpoint}/${encodeURI(file.remoteFilePath)}`,
       headers: {
-        'Host': `${this.provider.bucket}.${this.provider.region}.aliyuncs.com`,
+        'Host': `${this.provider.bucket}.${endpoint}`,
         'Authorization': signature,
         'Date': new Date().toUTCString(),
         'Content-Type': file.mimeType,
