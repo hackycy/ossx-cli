@@ -41,6 +41,10 @@ export async function bootstrap(): Promise<void> {
       onProgress: async (file: OSSFile, current: number, total: number, error?: unknown): Promise<void> => {
         bar.update(current, { filename: file.filename })
 
+        if (error && cfg.abortOnFailure) {
+          errorHandler(new Error(`Upload failed for ${file.remoteFilePath}, aborting...`))
+        }
+
         if (isFunction(cfg.onProgress)) {
           cfg.onProgress(file, current, total, error)
         }
@@ -66,6 +70,8 @@ function errorHandler(error: Error): void {
   if (process.env.DEBUG || process.env.NODE_ENV === 'development')
     message += `\n\n${error.stack || ''}`
 
+  console.log()
+  console.log()
   console.error(message)
   process.exit(ExitCode.FatalError)
 }

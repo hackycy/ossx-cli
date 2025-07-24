@@ -132,6 +132,12 @@ export interface OssOptions extends IUploadEvent {
   removeWhenUploaded?: boolean
 
   /**
+   * Abort the upload process if any file fails to upload
+   * @default false
+   */
+  abortOnFailure?: boolean
+
+  /**
    * Enable or disable logging
    * @default true
    */

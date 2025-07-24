@@ -6,6 +6,7 @@ import { loadConfig } from 'c12'
 const defaultOssOptions: Partial<OssOptions> = {
   target: 'dist',
   removeWhenUploaded: false,
+  abortOnFailure: false,
   logger: true,
   logDir: path.join('node_modules', '.ossx'),
 }
