@@ -23,7 +23,7 @@ export async function bootstrap(): Promise<void> {
       format: `${ansis.cyanBright('⚡')} ${ansis.bold('Uploading')} ${ansis.dim('|')} ${ansis.magentaBright('{bar}')} ${ansis.dim('|')} ${ansis.yellowBright('{percentage}%')} ${ansis.dim('|')} ${ansis.cyan('{value}')} ${ansis.dim('/')} ${ansis.cyanBright('{total}')} ${ansis.dim('|')} ${ansis.greenBright('{filename}')}`,
       hideCursor: true,
       clearOnComplete: false,
-      barsize: 50,
+      barsize: 40,
     }, CliProgress.Presets.shades_classic)
 
     await uploadOSS({
