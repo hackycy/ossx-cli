@@ -1,10 +1,13 @@
 import type { OssOptions } from './types'
+import path from 'node:path'
 import process from 'node:process'
 import { loadConfig } from 'c12'
 
 const defaultOssOptions: Partial<OssOptions> = {
   target: 'dist',
   removeWhenUploaded: false,
+  logger: true,
+  logDir: path.join('node_modules', '.ossx'),
 }
 
 export async function loadOssConfig(overrides?: Partial<OssOptions>, cwd = process.cwd()): Promise<OssOptions> {

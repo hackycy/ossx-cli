@@ -130,4 +130,16 @@ export interface OssOptions extends IUploadEvent {
    * @default false
    */
   removeWhenUploaded?: boolean
+
+  /**
+   * Enable or disable logging
+   * @default true
+   */
+  logger?: boolean
+
+  /**
+   * Directory to store log files, defaults to current working directory
+   * @default node_modules/.ossx
+   */
+  logDir?: string
 }
