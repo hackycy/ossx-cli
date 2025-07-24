@@ -37,11 +37,17 @@ export interface AliyunOSSProvider {
    * 存储空间（Bucket）
    */
   bucket: string
+
   /**
-   * OSS 地域（Region）
+   * OSS 访问入口 (Endpoint)
    * @href https://help.aliyun.com/zh/oss/user-guide/regions-and-endpoints
    */
-  area: string
+  endpoint: string
+
+  /**
+   * instruct OSS client to use HTTPS (secure: true) or HTTP (secure: false) protocol.
+   */
+  secure?: boolean
 }
 
 export interface TencentCloudCOS {
@@ -61,6 +67,7 @@ export interface CustomProvider {
 export type Provider = AliyunOSSProvider | TencentCloudCOS | CustomProvider
 
 export interface IUploadEvent {
+  onStart?: (total: number) => void
   onProgress?: (file: OSSFile, current: number, total: number) => void
   onComplete?: (file: OSSFile, error?: unknown) => void
   onFinish?: (total: number, fail: number) => void
@@ -90,6 +97,11 @@ export interface OssOptions extends IUploadEvent {
    * @default process.cwd()
    */
   cwd?: string
+
+  /**
+   * Include files during upload, support glob patterns
+   */
+  includeFiles?: string[]
 
   /**
    * Ignore files during upload, support glob patterns

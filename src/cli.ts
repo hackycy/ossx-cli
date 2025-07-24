@@ -20,7 +20,7 @@ export async function bootstrap(): Promise<void> {
     const cfg = await loadOssConfig()
 
     const bar = new CliProgress.SingleBar({
-      format: `${ansis.cyanBright('⚡')} ${ansis.bold('Uploading')} ${ansis.dim('|')} ${ansis.magentaBright('{bar}')} ${ansis.dim('|')} ${ansis.yellowBright('{percentage}%')} ${ansis.dim('|')} ${ansis.cyan('{value}')} ${ansis.dim('/')} ${ansis.cyanBright('{total}')} ${ansis.dim('|')} ${ansis.greenBright('{filename}')}`,
+      format: `${ansis.cyanBright('⚡')} ${ansis.bold('Uploading')} ${ansis.yellowBright(`{total} files`)} ${ansis.dim('|')} ${ansis.magentaBright('{bar}')} ${ansis.dim('|')} ${ansis.yellowBright('{percentage}%')} ${ansis.dim('|')} ${ansis.dim(`#{value}`)} ${ansis.greenBright('{filename}')}`,
       hideCursor: true,
       clearOnComplete: false,
       barsize: 40,
@@ -28,16 +28,18 @@ export async function bootstrap(): Promise<void> {
 
     await uploadOSS({
       ...cfg,
+      onStart: async (total: number): Promise<void> => {
+        clearScreen()
+        console.log(`${ansis.bold.cyanBright('OSSX CLI')}`)
+        console.log()
+        bar.start(total, 0, { filename: '' })
+
+        if (isFunction(cfg.onStart)) {
+          cfg.onStart(total)
+        }
+      },
       onProgress: async (file: OSSFile, current: number, total: number): Promise<void> => {
-        if (current === 1) {
-          clearScreen()
-          console.log(ansis.cyanBright(`OSSX CLI`))
-          console.log()
-          bar.start(total, 1, { filename: file.filename })
-        }
-        else {
-          bar.update(current, { filename: file.filename })
-        }
+        bar.update(current, { filename: file.filename })
 
         if (isFunction(cfg.onProgress)) {
           cfg.onProgress(file, current, total)

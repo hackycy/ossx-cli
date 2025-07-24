@@ -30,7 +30,7 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
   }
 
   // Define patterns to include/exclude
-  const patterns = ['**/*']
+  const patterns = Array.isArray(options.includeFiles) ? options.includeFiles : ['**/*']
   const ignorePatterns = Array.isArray(options.ignoreFiles) ? options.ignoreFiles : undefined
 
   // Get all files in the target directory
@@ -45,6 +45,10 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
 
   // network request
   const request = new Request()
+
+  if (isFunction(options.onStart)) {
+    options.onStart(globFiles.length)
+  }
 
   for (let i = 0; i < globFiles.length; i++) {
     const globFile = globFiles[i]

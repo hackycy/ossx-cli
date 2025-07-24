@@ -16,9 +16,9 @@ export class AliyunOSSUploader implements OSSUploader {
 
     const result = await request.request({
       method: 'PUT',
-      url: `https://${this.provider.bucket}.${this.provider.area}.aliyuncs.com/${encodeURI(file.remoteFilePath)}`,
+      url: `${this.provider.secure ? 'https' : 'http'}://${this.provider.bucket}.${this.provider.endpoint}/${encodeURI(file.remoteFilePath)}`,
       headers: {
-        'Host': `${this.provider.bucket}.${this.provider.area}.aliyuncs.com`,
+        'Host': `${this.provider.bucket}.${this.provider.endpoint}`,
         'Authorization': signature,
         'Date': new Date().toUTCString(),
         'Content-Type': file.mimeType,
