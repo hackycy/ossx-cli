@@ -30,19 +30,32 @@ export interface OSSUploader {
 }
 
 export interface AliyunOSSProvider {
+  /**
+   * 阿里云对象存储OSS（Object Storage Service）
+   * @href https://help.aliyun.com/zh/oss
+   */
   name: 'aliyun-oss'
+
+  /**
+   * AccessKey ID
+   */
   accessKeyId: string
+
+  /**
+   * AccessKey Secret
+   */
   accessKeySecret: string
+
   /**
    * 存储空间（Bucket）
    */
   bucket: string
 
   /**
-   * OSS 访问入口 (Endpoint)
+   * OSS 专用地域ID (Region)
    * @href https://help.aliyun.com/zh/oss/user-guide/regions-and-endpoints
    */
-  endpoint: string
+  region: string
 
   /**
    * instruct OSS client to use HTTPS (secure: true) or HTTP (secure: false) protocol.
