@@ -1,5 +1,6 @@
 import type { AliyunOSSProvider, IUploadContext, OSSUploader } from '../types'
 import crypto from 'node:crypto'
+import fs from 'node:fs'
 
 export class AliyunOSSUploader implements OSSUploader {
   constructor(private readonly provider: AliyunOSSProvider) { }
@@ -10,16 +11,19 @@ export class AliyunOSSUploader implements OSSUploader {
       throw new Error(`No mime type found for file ${file.filename}`)
     }
 
-    const signature = this.generateSignature(ctx.file.remoteFilePath, file.mimeType)
-    request.request({
+    const signature = this.generateSignature(file.remoteFilePath, file.mimeType)
+    const buffer = fs.readFileSync(file.localFilePath)
+
+    await request.request({
       method: 'PUT',
       url: `https://${this.provider.bucket}.${this.provider.area}.aliyuncs.com/${encodeURI(file.remoteFilePath)}`,
       headers: {
         'Host': `${this.provider.bucket}.${this.provider.area}.aliyuncs.com`,
         'Authorization': signature,
         'Date': new Date().toUTCString(),
-        'Content-Type': file.contentType!,
+        'Content-Type': file.mimeType,
       },
+      data: buffer,
     })
   }
 

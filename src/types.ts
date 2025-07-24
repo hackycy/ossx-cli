@@ -68,7 +68,6 @@ export interface OssOptions {
 
   /**
    * Remote directory path where files will be uploaded from
-   * @default '/'
    */
   destination?: string
 

@@ -6,7 +6,7 @@ import mime from 'mime-types'
 import { glob } from 'tinyglobby'
 import { createUploader } from './providers'
 import Request from './request'
-import { isNil } from './utils'
+import { combineURLs, isNil } from './utils'
 
 export async function uploadOSS(options: OssOptions): Promise<void> {
   if (!options.provider) {
@@ -15,10 +15,6 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
 
   if (!options.target) {
     throw new Error('Target directory is required')
-  }
-
-  if (!options.destination) {
-    throw new Error('Destination path is required')
   }
 
   // Create the appropriate uploader based on the provider
@@ -63,9 +59,7 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
     // Calculate the remote path - OSS always uses forward slashes (/) regardless of OS
     // Normalize the path to ensure consistent handling across platforms
     const normalizedPath = globFile.split(path.sep).join('/')
-    const remoteFilePath = options.destination.endsWith('/')
-      ? `${options.destination}${normalizedPath}`
-      : `${options.destination}/${normalizedPath}`
+    const remoteFilePath = options.destination ? combineURLs(options.destination, normalizedPath) : normalizedPath
 
     const file: OSSFile = {
       localFilePath,
