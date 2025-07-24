@@ -7,6 +7,36 @@
 
 ossx-cli is a cli tool for upload file to oss
 
+## install
+
+``` bash
+pnpm add -D ossx-cli
+```
+
+## Usage
+
+Run:
+
+``` bash
+npx ossx
+```
+
+### Configurations
+
+Create `ossx.config.[jt]s` file with:
+
+``` typescript
+import { defineConfig } from 'ossx-cli'
+
+export default defineConfig({
+  provider: {
+    name: 'aliyun-oss',
+    // ...
+  },
+  target: 'dist',
+})
+```
+
 ## License
 
 [MIT](./LICENSE) License © [hackycy](https://github.com/hackycy)
@@ -19,5 +49,5 @@ ossx-cli is a cli tool for upload file to oss
 [npm-downloads-href]: https://npmjs.com/package/ossx-cli
 [bundle-src]: https://img.shields.io/bundlephobia/minzip/ossx-cli?style=flat&colorA=080f12&colorB=1fa669&label=minzip
 [bundle-href]: https://bundlephobia.com/result?p=ossx-cli
-[license-src]: https://img.shields.io/github/license/antfu/ossx-cli.svg?style=flat&colorA=080f12&colorB=1fa669
+[license-src]: https://img.shields.io/github/license/hackycy/ossx-cli.svg?style=flat&colorA=080f12&colorB=1fa669
 [license-href]: https://github.com/hackycy/ossx-cli/blob/main/LICENSE
