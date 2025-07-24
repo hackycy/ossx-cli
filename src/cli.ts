@@ -20,9 +20,10 @@ export async function bootstrap(): Promise<void> {
     const cfg = await loadOssConfig()
 
     const bar = new CliProgress.SingleBar({
-      format: `Progress | ${ansis.greenBright('{bar}')} | ${ansis.blue('{value}')} ${ansis.dim('/')} ${ansis.blueBright('{total}')} | {filename}`,
+      format: `${ansis.cyanBright('⚡')} ${ansis.bold('Uploading')} ${ansis.dim('|')} ${ansis.magentaBright('{bar}')} ${ansis.dim('|')} ${ansis.yellowBright('{percentage}%')} ${ansis.dim('|')} ${ansis.cyan('{value}')} ${ansis.dim('/')} ${ansis.cyanBright('{total}')} ${ansis.dim('|')} ${ansis.greenBright('{filename}')}`,
       hideCursor: true,
       clearOnComplete: false,
+      barsize: 50,
     }, CliProgress.Presets.shades_classic)
 
     await uploadOSS({
@@ -31,6 +32,7 @@ export async function bootstrap(): Promise<void> {
         if (current === 1) {
           clearScreen()
           console.log(ansis.cyanBright(`OSSX CLI`))
+          console.log()
           bar.start(total, 1, { filename: file.filename })
         }
         else {
