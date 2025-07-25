@@ -1,10 +1,12 @@
 import type { OSSFile } from './types'
+import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import ansis from 'ansis'
 import CliProgress from 'cli-progress'
 import { loadOssConfig } from './config'
 import { Logger } from './logger'
+import { loadCliArgs } from './parse-args'
 import { uploadOSS } from './upload'
 import { clearScreen, isFunction } from './utils'
 
@@ -18,12 +20,27 @@ export async function bootstrap(): Promise<void> {
     process.on('uncaughtException', errorHandler)
     process.on('unhandledRejection', errorHandler)
 
+    const { help, version, clean } = loadCliArgs()
+
+    if (help || version) {
+      // Will be handled by cac, just need to exit
+      process.exit(ExitCode.Success)
+    }
+
     const cfg = await loadOssConfig()
 
     const cwd = cfg.cwd || process.cwd()
 
     // Initialize logger
     const logDir = path.resolve(cwd, cfg.logDir || '.')
+
+    if (clean && fs.existsSync(logDir)) {
+      // Clean log directory
+      fs.rmdirSync(logDir, { recursive: true })
+      console.log(`${ansis.bold.green('✔')} ${ansis.dim('Log directory cleand:')} ${ansis.bold.cyan(logDir)}`)
+      process.exit(ExitCode.Success)
+    }
+
     const logger: Logger | undefined = cfg.logger ? new Logger(logDir, cfg.provider) : undefined
 
     const bar = new CliProgress.SingleBar({
