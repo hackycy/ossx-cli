@@ -43,7 +43,7 @@ export class Logger {
 
   logTaskCompletion(totalFiles: number, successCount: number, failCount: number): void {
     const timestamp = new Date().toISOString()
-    const logEntry = `[${timestamp}] TASK COMPLETED\n`
+    const logEntry = `OSS Upload Log - Complete at ${timestamp}\n`
       + `  Total files processed: ${totalFiles}\n`
       + `  Successfully uploaded: ${successCount}\n`
       + `  Failed uploads: ${failCount}\n`

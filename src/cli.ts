@@ -51,7 +51,13 @@ export async function bootstrap(): Promise<void> {
       },
       onFinish: async (total: number, fail: number): Promise<void> => {
         bar.stop()
-        console.log(`✨ Upload completed: ${ansis.cyan(total)} files processed, ${ansis.yellow(fail)} failed.`)
+        console.log(`${ansis.bold.greenBright('✨ Upload completed!')}\n`)
+        console.log(`  ${ansis.cyanBright('•')} ${ansis.white('Total files:')} ${ansis.bold.white(total)}`)
+        console.log(`  ${ansis.greenBright('•')} ${ansis.white('Successfully uploaded:')} ${ansis.bold.green(total - fail)}`)
+        if (fail > 0) {
+          console.log(`  ${ansis.redBright('•')} ${ansis.white('Failed uploads:')} ${ansis.bold.red(fail)}`)
+        }
+        console.log()
 
         if (isFunction(cfg.onFinish)) {
           cfg.onFinish(total, fail)
