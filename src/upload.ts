@@ -26,7 +26,7 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
 
   // Initialize logger
   const logDir = path.resolve(cwd, options.logDir || '.')
-  const logger: Logger | undefined = options.logger ? new Logger(logDir) : undefined
+  const logger: Logger | undefined = options.logger ? new Logger(logDir, options.provider) : undefined
 
   // Scan the target directory for files
   const targetDir = path.resolve(cwd, options.target)

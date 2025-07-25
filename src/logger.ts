@@ -3,18 +3,28 @@ import path from 'node:path'
 
 export class Logger {
   private logFilePath: string
+  private provider: Record<string, any>
 
-  constructor(logDir: string) {
+  constructor(logDir: string, provider: Record<string, any>) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
     const logFileName = `ossx-${timestamp}.log`
     this.logFilePath = path.join(logDir, logFileName)
+    this.provider = provider
 
     // Ensure log directory exists
     fs.mkdirSync(logDir, { recursive: true })
 
     // Create log file with initial header
-    const header = `OSS Upload Log - Started at ${timestamp}`
-    fs.writeFileSync(this.logFilePath, header)
+    let header = `OSS Upload Log - Started at ${timestamp}\n`
+      + `  Provider: ${this.provider.name || 'N/A'}\n`
+
+    Object.entries(this.provider).forEach(([key, value]) => {
+      if (key === 'name') {
+        return
+      }
+      header += `  ${key}: ${value || 'N/A'}\n`
+    })
+    fs.writeFileSync(this.logFilePath, header.trim())
     this.logSeparator()
   }
 
@@ -52,7 +62,7 @@ export class Logger {
     fs.appendFileSync(this.logFilePath, separator)
   }
 
-  getLogPath(): string {
+  public getLogPath(): string {
     return this.logFilePath
   }
 }
