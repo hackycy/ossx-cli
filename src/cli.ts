@@ -1,15 +1,16 @@
 import type { OSSFile } from './types'
+import path from 'node:path'
 import process from 'node:process'
 import ansis from 'ansis'
 import CliProgress from 'cli-progress'
 import { loadOssConfig } from './config'
+import { Logger } from './logger'
 import { uploadOSS } from './upload'
 import { clearScreen, isFunction } from './utils'
 
 export enum ExitCode {
   Success = 0,
   FatalError = 1,
-  InvalidArgument = 9,
 }
 
 export async function bootstrap(): Promise<void> {
@@ -18,6 +19,12 @@ export async function bootstrap(): Promise<void> {
     process.on('unhandledRejection', errorHandler)
 
     const cfg = await loadOssConfig()
+
+    const cwd = cfg.cwd || process.cwd()
+
+    // Initialize logger
+    const logDir = path.resolve(cwd, cfg.logDir || '.')
+    const logger: Logger | undefined = cfg.logger ? new Logger(logDir, cfg.provider) : undefined
 
     const bar = new CliProgress.SingleBar({
       format: `${ansis.cyanBright('⚡')} ${ansis.bold('Uploading')} ${ansis.yellowBright(`{total} files`)} ${ansis.dim('|')} ${ansis.magentaBright('{bar}')} ${ansis.dim('|')} ${ansis.yellowBright('{percentage}%')} ${ansis.dim('|')} ${ansis.dim(`#{value}`)} ${ansis.greenBright('{filename}')}`,
@@ -28,6 +35,7 @@ export async function bootstrap(): Promise<void> {
 
     await uploadOSS({
       ...cfg,
+      cwd,
       onStart: async (total: number): Promise<void> => {
         clearScreen()
         console.log(`${ansis.bold.cyanBright('OSSX CLI')}`)
@@ -35,32 +43,35 @@ export async function bootstrap(): Promise<void> {
         bar.start(total, 0, { filename: '' })
 
         if (isFunction(cfg.onStart)) {
-          cfg.onStart(total)
+          await cfg.onStart(total)
         }
       },
       onProgress: async (file: OSSFile, current: number, total: number, error?: unknown): Promise<void> => {
         bar.update(current, { filename: file.filename })
 
-        if (error && cfg.abortOnFailure) {
-          errorHandler(new Error(`Upload failed for ${file.remoteFilePath}, aborting...`))
+        if (error) {
+          // Log the error with detailed information
+          logger?.logError(file.remoteFilePath, error)
+
+          if (cfg.abortOnFailure) {
+            errorHandler(new Error(`Upload failed for ${file.remoteFilePath}, aborting...`))
+          }
         }
 
         if (isFunction(cfg.onProgress)) {
-          cfg.onProgress(file, current, total, error)
+          await cfg.onProgress(file, current, total, error)
         }
       },
       onFinish: async (total: number, fail: number): Promise<void> => {
         bar.stop()
-        console.log(`${ansis.bold.greenBright('✨ Upload completed!')}\n`)
-        console.log(`  ${ansis.cyanBright('•')} ${ansis.white('Total files:')} ${ansis.bold.white(total)}`)
-        console.log(`  ${ansis.greenBright('•')} ${ansis.white('Successfully uploaded:')} ${ansis.bold.green(total - fail)}`)
-        if (fail > 0) {
-          console.log(`  ${ansis.redBright('•')} ${ansis.white('Failed uploads:')} ${ansis.bold.red(fail)}`)
-        }
-        console.log()
+
+        // Log task completion summary
+        logger?.logTaskCompletion(total, total - fail, fail)
+
+        console.log(`${ansis.bold.yellowBright(`${fail <= 0 ? '🎉' : '⚠️'}  Upload completed`)}${ansis.dim(':')} ${ansis.cyanBright('•')} ${ansis.bold('Total:')} ${ansis.cyan(total)} ${ansis.greenBright('•')} ${ansis.bold('Success:')} ${ansis.green(total - fail)}${fail > 0 ? ` ${ansis.redBright('•')} ${ansis.bold('Failed:')} ${ansis.red(fail)}` : ''}`)
 
         if (isFunction(cfg.onFinish)) {
-          cfg.onFinish(total, fail)
+          await cfg.onFinish(total, fail)
         }
       },
     })

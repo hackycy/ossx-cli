@@ -9,6 +9,7 @@ const defaultOssOptions: Partial<OssOptions> = {
   abortOnFailure: false,
   logger: true,
   logDir: path.join('node_modules', '.ossx'),
+  cwd: process.cwd(),
 }
 
 export async function loadOssConfig(overrides?: Partial<OssOptions>, cwd = process.cwd()): Promise<OssOptions> {

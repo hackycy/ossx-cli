@@ -4,7 +4,6 @@ import path from 'node:path'
 import process from 'node:process'
 import mime from 'mime-types'
 import { glob } from 'tinyglobby'
-import { Logger } from './logger'
 import { createUploader } from './providers'
 import Request from './request'
 import { combineURLs, isFunction, isNil } from './utils'
@@ -23,10 +22,6 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
 
   // Use provided cwd or default to process.cwd()
   const cwd = options.cwd || process.cwd()
-
-  // Initialize logger
-  const logDir = path.resolve(cwd, options.logDir || '.')
-  const logger: Logger | undefined = options.logger ? new Logger(logDir, options.provider) : undefined
 
   // Scan the target directory for files
   const targetDir = path.resolve(cwd, options.target)
@@ -52,7 +47,12 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
   const request = new Request()
 
   if (isFunction(options.onStart)) {
-    options.onStart(globFiles.length)
+    try {
+      await options.onStart(globFiles.length)
+    }
+    catch {
+      // ignore
+    }
   }
 
   for (let i = 0; i < globFiles.length; i++) {
@@ -110,14 +110,11 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
     catch (error) {
       failCount++
       uploadError = error
-
-      // Log the error with detailed information
-      logger?.logError(remoteFilePath, error)
     }
     finally {
       if (isFunction(options.onProgress)) {
         try {
-          options.onProgress(file, i + 1, globFiles.length, uploadError)
+          await options.onProgress(file, i + 1, globFiles.length, uploadError)
         }
         catch {
           // ignore
@@ -126,11 +123,7 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
     }
   }
 
-  // Log task completion summary
-  const successCount = globFiles.length - failCount
-  logger?.logTaskCompletion(globFiles.length, successCount, failCount)
-
   if (isFunction(options.onFinish)) {
-    options.onFinish(globFiles.length, failCount)
+    await options.onFinish(globFiles.length, failCount)
   }
 }

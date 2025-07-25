@@ -85,9 +85,9 @@ export interface CustomProvider {
 export type Provider = AliyunOSSProvider | TencentCloudCOS | CustomProvider
 
 export interface IUploadEvent {
-  onStart?: (total: number) => void
-  onProgress?: (file: OSSFile, current: number, total: number, error?: unknown) => void
-  onFinish?: (total: number, fail: number) => void
+  onStart?: (total: number) => void | PromiseLike<void>
+  onProgress?: (file: OSSFile, current: number, total: number, error?: unknown) => void | PromiseLike<void>
+  onFinish?: (total: number, fail: number) => void | PromiseLike<void>
 }
 
 export interface OssOptions extends IUploadEvent {
