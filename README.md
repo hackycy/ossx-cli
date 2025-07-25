@@ -5,25 +5,29 @@
 [![bundle][bundle-src]][bundle-href]
 [![License][license-src]][license-href]
 
-ossx-cli is a cli tool for upload file to oss
+指定文件夹上传至对象存储服务，可用于日常部署前端代码自动化脚本
 
-## install
+| 云平台  | 阿里云  |  腾讯云 | 七牛 | 自定义 |
+| ------ | :---: | :---: | :------: | :------: |
+| 是否支持  |   ✅   |   计划支持   |   计划支持   |    ✅     |
+
+## 安装
 
 ``` bash
 pnpm add -D ossx-cli
 ```
 
-## Usage
+## 使用
 
-Run:
+运行:
 
 ``` bash
 npx ossx
 ```
 
-### Configurations
+### 配置
 
-Create `ossx.config.[jt]s` file with:
+创建`ossx.config.[jt]s`文件:
 
 ``` typescript
 import { defineConfig } from 'ossx-cli'
