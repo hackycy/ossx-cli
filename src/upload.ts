@@ -39,6 +39,7 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
     ignore: ignorePatterns,
     dot: true,
     absolute: false,
+    onlyFiles: true,
   })
 
   let failCount = 0

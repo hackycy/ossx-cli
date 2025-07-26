@@ -70,11 +70,38 @@ export interface AliyunOSSProvider {
 
 export interface TencentCloudCOS {
   name: 'tencent-cloud-cos'
+
+  /**
+   * Secret Id
+   */
   secretId: string
+
+  /**
+   * Secret Key
+   */
   secretKey: string
+
+  /**
+   * 存储桶（Bucket) 存储桶名称由[自定义名称]-[开发商 APPID]构成 e.g. <名称>-1234567890
+   */
   bucket: string
-  appId: string
-  area: string
+
+  /**
+   * 地域（Region）e.g. ap-guangzhou
+   * @href https://cloud.tencent.com/document/product/436/6224
+   */
+  region: string
+
+  /**
+   * endpoint 是 COS 访问域名信息 e.g. cos.ap-guangzhou.myqcloud.com
+   * @href https://cloud.tencent.com/document/product/436/12296
+   */
+  endpoint?: string
+
+  /**
+   * instruct OSS client to use HTTPS (secure: true) or HTTP (secure: false) protocol.
+   */
+  secure?: boolean
 }
 
 export interface CustomProvider {
@@ -148,4 +175,9 @@ export interface OssOptions extends IUploadEvent {
    * @default node_modules/.ossx
    */
   logDir?: string
+
+  /**
+   * Maximum number of log files to keep, not specified means no limit
+   */
+  maxLogfiles?: number
 }

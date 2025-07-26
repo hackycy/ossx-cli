@@ -28,12 +28,9 @@ export async function bootstrap(): Promise<void> {
     }
 
     const cfg = await loadOssConfig()
-
     const cwd = cfg.cwd || process.cwd()
 
-    // Initialize logger
     const logDir = path.isAbsolute(cfg.logDir!) ? cfg.logDir! : path.resolve(cwd, cfg.logDir!)
-
     if (clean && fs.existsSync(logDir)) {
       // Clean log directory
       fs.rmdirSync(logDir, { recursive: true })
@@ -41,7 +38,8 @@ export async function bootstrap(): Promise<void> {
       process.exit(ExitCode.Success)
     }
 
-    const logger: Logger | undefined = cfg.logger ? new Logger(logDir, cfg.provider) : undefined
+    // Initialize logger
+    const logger: Logger | undefined = cfg.logger ? new Logger(logDir, cfg.provider, cfg.maxLogfiles) : undefined
 
     const bar = new CliProgress.SingleBar({
       format: `${ansis.cyanBright('⚡')} ${ansis.bold('Uploading')} ${ansis.yellowBright(`{total} files`)} ${ansis.dim('|')} ${ansis.magentaBright('{bar}')} ${ansis.dim('|')} ${ansis.yellowBright('{percentage}%')} ${ansis.dim('|')} ${ansis.dim(`#{value}`)} ${ansis.greenBright('{filename}')}`,

@@ -5,15 +5,21 @@ export class Logger {
   private logFilePath: string
   private provider: Record<string, any>
   private startTime: Date
+  private logDir: string
+  private maxLogfiles?: number
 
-  constructor(logDir: string, provider: Record<string, any>) {
+  constructor(logDir: string, provider: Record<string, any>, maxLogfiles?: number) {
     this.startTime = new Date()
+    this.logDir = logDir
+    this.maxLogfiles = maxLogfiles
     const logFileName = `ossx-${this.getLocalTimestamp(true)}.log`
     this.logFilePath = path.join(logDir, logFileName)
     this.provider = provider
 
     // Ensure log directory exists
-    fs.mkdirSync(logDir, { recursive: true })
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true })
+    }
 
     // Create log file with initial header
     let header = `OSS Upload Log - Started at ${this.getLocalTimestamp()}\n`
@@ -27,6 +33,11 @@ export class Logger {
     })
     fs.writeFileSync(this.logFilePath, header.trim())
     this.logSeparator()
+
+    // Clean up old log files if maxLogfiles is specified
+    if (typeof this.maxLogfiles === 'number' && this.maxLogfiles > 0) {
+      this.cleanupOldLogFiles()
+    }
   }
 
   logError(file: string, error: unknown): void {
@@ -107,6 +118,41 @@ export class Logger {
   private logSeparator(symbol = '-'): void {
     const separator = `\n${symbol.repeat(80)}\n`
     fs.appendFileSync(this.logFilePath, separator)
+  }
+
+  /**
+   * Clean up old log files when maxLogfiles limit is exceeded
+   */
+  private cleanupOldLogFiles(): void {
+    try {
+      const files = fs.readdirSync(this.logDir)
+      const logFiles = files
+        .filter((file) => {
+          return file.startsWith('ossx-') && file.endsWith('.log') && fs.statSync(path.join(this.logDir, file)).isFile()
+        })
+        .map(file => ({
+          name: file,
+          path: path.join(this.logDir, file),
+          stats: fs.statSync(path.join(this.logDir, file)),
+        }))
+        .sort((a, b) => b.stats.mtime.getTime() - a.stats.mtime.getTime()) // Sort by modification time, newest first
+
+      // If we have more log files than the limit, remove the oldest ones
+      if (logFiles.length > this.maxLogfiles!) {
+        const filesToRemove = logFiles.slice(this.maxLogfiles!)
+        filesToRemove.forEach((file) => {
+          try {
+            fs.rmSync(file.path)
+          }
+          catch {
+            // Silently ignore errors when removing old log files
+          }
+        })
+      }
+    }
+    catch {
+      // Silently ignore errors during cleanup
+    }
   }
 
   public getLogPath(): string {
