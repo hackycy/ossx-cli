@@ -83,11 +83,20 @@ export async function bootstrap(): Promise<void> {
         // Log task completion summary
         logger?.logTaskCompletion(total, total - fail, fail)
 
-        console.log(`${ansis.bold.yellowBright('✨ Upload completed!')}\n`)
-        console.log(`  ${ansis.cyanBright('•')} ${ansis.dim('Total files:')} ${ansis.bold.cyan(total)}`)
-        console.log(`  ${ansis.greenBright('•')} ${ansis.dim('Successfully uploaded:')} ${ansis.bold.green(total - fail)}`)
+        let summary = `  ${ansis.gray('•')}  ${ansis.dim('Provider:')} ${ansis.bold.white(cfg.provider.name)}`
+          + `  ${ansis.dim('Target:')} ${ansis.bold.white(cfg.target)}`
+
+        if (cfg.destination) {
+          summary += `  ${ansis.dim('Destination:')} ${ansis.bold.white(cfg.destination)}`
+        }
+
+        console.log(`${ansis.bold.yellowBright('✨ Upload completed')}`)
+        console.log()
+        console.log(summary)
+        console.log(`  ${ansis.gray('•')}  ${ansis.dim('Total files:')} ${ansis.bold.blue(total)}`)
+        console.log(`  ${ansis.gray('•')}  ${ansis.dim('Successfully uploaded:')} ${ansis.bold.green(total - fail)}`)
         if (fail > 0) {
-          console.log(`  ${ansis.redBright('•')} ${ansis.dim('Failed uploads:')} ${ansis.bold.red(fail)}`)
+          console.log(`  ${ansis.gray('•')}  ${ansis.dim('Failed uploads:')} ${ansis.bold.red(fail)}`)
         }
         console.log()
 
