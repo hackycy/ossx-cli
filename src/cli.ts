@@ -32,7 +32,7 @@ export async function bootstrap(): Promise<void> {
     const cwd = cfg.cwd || process.cwd()
 
     // Initialize logger
-    const logDir = path.resolve(cwd, cfg.logDir || '.')
+    const logDir = path.isAbsolute(cfg.logDir!) ? cfg.logDir! : path.resolve(cwd, cfg.logDir!)
 
     if (clean && fs.existsSync(logDir)) {
       // Clean log directory
