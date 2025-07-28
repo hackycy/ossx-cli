@@ -49,14 +49,34 @@ export class Logger {
 
     let logEntry = `[${timestamp}] ERROR: Failed to upload ${file}\n`
       + `Message: ${errorMessage}\n`
-      + `Stack: ${stackTrace}`
+      + `Stack: ${stackTrace}\n`
 
     if (isAxiosError(error)) {
-      logEntry += `\nAxios Request: ${error.config?.method?.toUpperCase()} ${error.status} ${error.config?.url}`
+      // HTTP request/response format logging
+      logEntry += `\nHTTP Request:\n`
+      logEntry += `  Method: ${error.config?.method?.toUpperCase() || 'UNKNOWN'}\n`
+      logEntry += `  URL: ${error.config?.url || 'N/A'}\n`
+      logEntry += `  Status: ${error.response?.status || 'N/A'} ${error.response?.statusText || ''}\n`
+
+      if (error.config?.headers) {
+        logEntry += `  Request Headers:\n`
+        Object.entries(error.config.headers).forEach(([key, value]) => {
+          logEntry += `    ${key}: ${value}\n`
+        })
+      }
+
+      if (error.response?.headers) {
+        logEntry += `  Response Headers:\n`
+        Object.entries(error.response.headers).forEach(([key, value]) => {
+          logEntry += `    ${key}: ${value}\n`
+        })
+      }
 
       if (error.response?.data) {
-        const formatData = typeof error.response.data === 'string' ? error.response.data : safeStringify(error.response.data)
-        logEntry += `\nAxios Response:\n${formatData}`
+        const formatData = typeof error.response.data === 'string'
+          ? error.response.data
+          : safeStringify(error.response.data)
+        logEntry += `  Response Body:\n${formatData}`
       }
     }
 
