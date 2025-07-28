@@ -28,3 +28,12 @@ export function clearScreen(): void {
   readline.cursorTo(process.stdout, 0, 0)
   readline.clearScreenDown(process.stdout)
 }
+
+export function safeStringify(obj: unknown): string {
+  try {
+    return JSON.stringify(obj)
+  }
+  catch {
+    return `${obj}`
+  }
+}

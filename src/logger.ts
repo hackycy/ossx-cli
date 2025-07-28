@@ -1,5 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { isAxiosError } from 'axios'
+import { safeStringify } from './utils'
 
 export class Logger {
   private logFilePath: string
@@ -45,9 +47,18 @@ export class Logger {
     const errorMessage = error instanceof Error ? error.message : String(error)
     const stackTrace = error instanceof Error ? error.stack : ''
 
-    const logEntry = `[${timestamp}] ERROR: Failed to upload ${file}\n`
-      + `  Message: ${errorMessage}\n`
-      + `  Stack: ${stackTrace}`
+    let logEntry = `[${timestamp}] ERROR: Failed to upload ${file}\n`
+      + `Message: ${errorMessage}\n`
+      + `Stack: ${stackTrace}`
+
+    if (isAxiosError(error)) {
+      logEntry += `\nAxios Request: ${error.config?.method?.toUpperCase()} ${error.status} ${error.config?.url}`
+
+      if (error.response?.data) {
+        const formatData = typeof error.response.data === 'string' ? error.response.data : safeStringify(error.response.data)
+        logEntry += `\nAxios Response:\n${formatData}`
+      }
+    }
 
     fs.appendFileSync(this.logFilePath, logEntry)
     this.logSeparator()
