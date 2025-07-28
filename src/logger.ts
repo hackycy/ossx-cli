@@ -1,3 +1,5 @@
+import type { OssOptions } from './types'
+import { Buffer } from 'node:buffer'
 import fs from 'node:fs'
 import path from 'node:path'
 import { isAxiosError } from 'axios'
@@ -10,13 +12,14 @@ export class Logger {
   private logDir: string
   private maxLogfiles?: number
 
-  constructor(logDir: string, provider: Record<string, any>, maxLogfiles?: number) {
+  constructor(logDir: string, cfg: OssOptions) {
     this.startTime = new Date()
     this.logDir = logDir
-    this.maxLogfiles = maxLogfiles
+    this.maxLogfiles = cfg.maxLogfiles
+    this.provider = cfg.provider
+
     const logFileName = `ossx-${this.getLocalTimestamp(true)}.log`
     this.logFilePath = path.join(logDir, logFileName)
-    this.provider = provider
 
     // Ensure log directory exists
     if (!fs.existsSync(logDir)) {
@@ -25,14 +28,26 @@ export class Logger {
 
     // Create log file with initial header
     let header = `OSS Upload Log - Started at ${this.getLocalTimestamp()}\n`
-      + `  Provider: ${this.provider.name || 'N/A'}\n`
+
+    if (cfg.target) {
+      header += `  Target Directory: ${cfg.target}\n`
+    }
+    if (cfg.destination) {
+      header += `  Destination Directory: ${cfg.destination}\n`
+    }
+    if (cfg.cwd) {
+      header += `  CWD: ${cfg.cwd}\n`
+    }
+
+    header += `  Provider: ${this.provider.name || 'N/A'}\n`
 
     Object.entries(this.provider).forEach(([key, value]) => {
       if (key === 'name') {
         return
       }
-      header += `  ${key}: ${value || 'N/A'}\n`
+      header += `    ${key}: ${value || 'N/A'}\n`
     })
+
     fs.writeFileSync(this.logFilePath, header.trim())
     this.logSeparator()
 
@@ -56,6 +71,32 @@ export class Logger {
       logEntry += `\nHTTP Request:\n`
       logEntry += `  Method: ${error.config?.method?.toUpperCase() || 'UNKNOWN'}\n`
       logEntry += `  URL: ${error.config?.url || 'N/A'}\n`
+
+      // Add URL params if present
+      if (error.config?.params) {
+        logEntry += `  URL Params: ${safeStringify(error.config.params)}\n`
+      }
+
+      // Add request data type information
+      if (error.config?.data !== undefined) {
+        const dataType = typeof error.config.data
+        const isFormData = error.config.data instanceof FormData
+        const isBuffer = Buffer.isBuffer(error.config.data)
+
+        let dataInfo: string = dataType
+        if (isFormData) {
+          dataInfo = 'FormData'
+        }
+        else if (isBuffer) {
+          dataInfo = 'Buffer'
+        }
+        else if (dataType === 'object' && error.config.data !== null) {
+          dataInfo = `${dataType} (${Array.isArray(error.config.data) ? 'Array' : 'Object'})`
+        }
+
+        logEntry += `  Request Data: [${dataInfo}]\n`
+      }
+
       logEntry += `  Status: ${error.response?.status || 'N/A'} ${error.response?.statusText || ''}\n`
 
       if (error.config?.headers) {

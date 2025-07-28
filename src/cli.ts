@@ -39,7 +39,7 @@ export async function bootstrap(): Promise<void> {
     }
 
     // Initialize logger
-    const logger: Logger | undefined = cfg.logger ? new Logger(logDir, cfg.provider, cfg.maxLogfiles) : undefined
+    const logger: Logger | undefined = cfg.logger ? new Logger(logDir, cfg) : undefined
 
     const bar = new CliProgress.SingleBar({
       format: `${ansis.cyanBright('⚡')} ${ansis.bold('Uploading')} ${ansis.yellowBright(`{total} files`)} ${ansis.dim('|')} ${ansis.magentaBright('{bar}')} ${ansis.dim('|')} ${ansis.yellowBright('{percentage}%')} ${ansis.dim('|')} ${ansis.dim(`#{value}`)} ${ansis.greenBright('{filename}')}`,
