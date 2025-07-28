@@ -26,7 +26,7 @@ pnpm add -D ossx-cli
 运行:
 
 ``` bash
-npx ossx
+pnpm ossx
 ```
 
 ### 配置
@@ -39,9 +39,15 @@ import { defineConfig } from 'ossx-cli'
 export default defineConfig({
   provider: {
     name: 'aliyun-oss',
-    // ...
+    // ...不同OSS剩余配置请查看types
   },
+  // cwd: process.cwd(),
+  // 本地要上传的目录，相对于cwd，只允许相对路径
   target: 'dist',
+  // OSS目录，会将所有文件上传至该目录，可不填，但不要以/开头
+  destination: 'archive',
+  // 忽略上传的文件，支持glob
+  ignoreFiles: ['*.zip']
 })
 ```
 
