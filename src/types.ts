@@ -1,6 +1,7 @@
 import type { AxiosRequestConfig, AxiosResponse } from 'axios'
 
 export interface IRequest {
+  setDefaults: (config: AxiosRequestConfig) => void
   request: <T, U>(config: AxiosRequestConfig<U>) => Promise<AxiosResponse<T, U>>
 }
 
@@ -111,8 +112,12 @@ export interface CustomProvider {
 
 export type Provider = AliyunOSSProvider | TencentCloudCOS | CustomProvider
 
+export interface OnStartOptions {
+  setRequestDefault: IRequest['setDefaults']
+}
+
 export interface IUploadEvent {
-  onStart?: (total: number) => void | PromiseLike<void>
+  onStart?: (total: number, opt: OnStartOptions) => void | PromiseLike<void>
   onProgress?: (file: OSSFile, current: number, total: number, error?: unknown) => void | PromiseLike<void>
   onFinish?: (total: number, fail: number) => void | PromiseLike<void>
 }

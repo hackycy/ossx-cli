@@ -1,4 +1,3 @@
-import type { OSSFile } from './types'
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
@@ -51,17 +50,17 @@ export async function bootstrap(): Promise<void> {
     await uploadOSS({
       ...cfg,
       cwd,
-      onStart: async (total: number): Promise<void> => {
+      onStart: async (total, opt): Promise<void> => {
         clearScreen()
         console.log(`${ansis.bold.cyanBright('OSSX CLI')}`)
         console.log()
         bar.start(total, 0, { filename: '' })
 
         if (isFunction(cfg.onStart)) {
-          await cfg.onStart(total)
+          await cfg.onStart(total, opt)
         }
       },
-      onProgress: async (file: OSSFile, current: number, total: number, error?: unknown): Promise<void> => {
+      onProgress: async (file, current, total, error): Promise<void> => {
         bar.update(current, { filename: file.filename })
 
         if (error) {
@@ -77,7 +76,7 @@ export async function bootstrap(): Promise<void> {
           await cfg.onProgress(file, current, total, error)
         }
       },
-      onFinish: async (total: number, fail: number): Promise<void> => {
+      onFinish: async (total, fail): Promise<void> => {
         bar.stop()
 
         // Log task completion summary

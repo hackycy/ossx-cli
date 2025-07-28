@@ -49,7 +49,11 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
 
   if (isFunction(options.onStart)) {
     try {
-      await options.onStart(globFiles.length)
+      await options.onStart(globFiles.length, {
+        setRequestDefault: (cfg) => {
+          request.setDefaults(cfg)
+        },
+      })
     }
     catch {
       // ignore
