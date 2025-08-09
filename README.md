@@ -35,9 +35,9 @@ pnpm add -D ossx-cli
 pnpm ossx
 ```
 
-### 配置
+### 创建配置
 
-创建`ossx.config.[jt]s`文件:
+项目根目录创建`ossx.config.[ts|js|json]`文件:
 
 ``` typescript
 import { defineConfig } from 'ossx-cli'
@@ -54,6 +54,46 @@ export default defineConfig({
   destination: 'archive',
   // 忽略上传的文件，支持glob
   ignoreFiles: ['*.zip']
+})
+```
+
+#### 配置示例
+
+腾讯云
+
+``` typescript
+import { defineConfig } from './src'
+
+export default defineConfig({
+  provider: {
+    name: 'tencent-cloud-cos',
+    secretId: 'xxx',
+    secretKey: 'xxx',
+    bucket: 'bucket-xxx',
+    region: 'ap-guangzhou',
+  },
+  target: 'dist',
+  destination: 'www',
+  maxLogfiles: 30
+})
+```
+
+SSH
+
+``` typescript
+import { defineConfig } from './src'
+
+export default defineConfig({
+  provider: {
+    name: 'ssh',
+    host: '127.0.0.1',
+    port: 22,
+    username: 'ubuntu',
+    privateKeyPath: './.ssh/key.pem'
+  },
+  target: 'dist',
+  destination: '/opt/nginx/www',
+  maxLogfiles: 30
 })
 ```
 
