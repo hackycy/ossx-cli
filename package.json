@@ -1,7 +1,7 @@
 {
   "name": "ossx-cli",
   "type": "module",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "packageManager": "pnpm@10.14.0",
   "description": "ossx-cli is a cli tool for upload file to oss",
   "author": "hackycy",
