@@ -129,6 +129,19 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
   }
 
   if (isFunction(options.onFinish)) {
-    await options.onFinish(globFiles.length, failCount)
+    try {
+      await options.onFinish(globFiles.length, failCount)
+    }
+    catch {
+      // ignore
+    }
+  }
+
+  // release
+  try {
+    uploader.onDestroy?.()
+  }
+  catch {
+    // ignore
   }
 }

@@ -1,4 +1,5 @@
 import type { AxiosRequestConfig, AxiosResponse } from 'axios'
+import type { Buffer } from 'node:buffer'
 
 export interface IRequest {
   setDefaults: (config: AxiosRequestConfig) => void
@@ -28,6 +29,11 @@ export interface OSSUploader {
    * @param options Additional upload options
    */
   uploadFile: (ctx: IUploadContext) => PromiseLike<void> | void
+
+  /**
+   * Event triggered
+   */
+  onDestroy?: () => PromiseLike<void> | void
 }
 
 export interface AliyunOSSProvider {
@@ -69,7 +75,7 @@ export interface AliyunOSSProvider {
   secure?: boolean
 }
 
-export interface TencentCloudCOS {
+export interface TencentCloudCOSProvider {
   name: 'tencent-cloud-cos'
 
   /**
@@ -105,12 +111,55 @@ export interface TencentCloudCOS {
   secure?: boolean
 }
 
+/**
+ * @see https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/ssh2/index.d.ts#L714
+ */
+export interface SSHProvider {
+  name: 'ssh'
+  /**
+   * Hostname or IP address of the server
+   */
+  host?: string
+
+  /**
+   * Port number of the server.
+   */
+  port?: number
+
+  /**
+   * Username for authentication.
+   */
+  username?: string
+
+  /**
+   * Password for password-based user authentication.
+   */
+  password?: string
+
+  /**
+   * Path to the private key file for key-based authentication.
+   */
+  privateKeyPath?: string
+
+  /**
+   * Buffer that contains a private key for either key-based or hostbased user authentication (OpenSSH format).
+   */
+  privateKey?: Buffer
+
+  /**
+   * Allow additional properties for flexibility
+   *
+   * @link https://github.com/steelbrain/node-ssh
+   */
+  [x: string]: any
+}
+
 export interface CustomProvider {
   name: 'custom'
   upload: OSSUploader['uploadFile']
 }
 
-export type Provider = AliyunOSSProvider | TencentCloudCOS | CustomProvider
+export type Provider = AliyunOSSProvider | TencentCloudCOSProvider | SSHProvider | CustomProvider
 
 export interface OnStartOptions {
   setRequestDefault: IRequest['setDefaults']

@@ -1,6 +1,7 @@
 import type { OSSUploader, Provider } from '../types'
 import { AliyunOSSUploader } from './aliyun'
 import { CustomUploader } from './custom'
+import { SSHUploader } from './ssh'
 import { TencentCOSUploader } from './tencent'
 
 /**
@@ -12,6 +13,8 @@ export function createUploader(provider: Provider): OSSUploader {
       return new AliyunOSSUploader(provider)
     case 'tencent-cloud-cos':
       return new TencentCOSUploader(provider)
+    case 'ssh':
+      return new SSHUploader(provider)
     case 'custom':
       return new CustomUploader(provider)
     default:

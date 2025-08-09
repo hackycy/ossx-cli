@@ -1,4 +1,4 @@
-import type { IUploadContext, OSSUploader, TencentCloudCOS } from '../types'
+import type { IUploadContext, OSSUploader, TencentCloudCOSProvider } from '../types'
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 
@@ -8,7 +8,7 @@ interface ISignature {
 }
 
 export class TencentCOSUploader implements OSSUploader {
-  constructor(private readonly provider: TencentCloudCOS) { }
+  constructor(private readonly provider: TencentCloudCOSProvider) { }
 
   async uploadFile(ctx: IUploadContext): Promise<void> {
     const { request, file } = ctx
