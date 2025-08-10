@@ -62,7 +62,7 @@ export default defineConfig({
 腾讯云
 
 ``` typescript
-import { defineConfig } from './src'
+import { defineConfig } from 'ossx-cli'
 
 export default defineConfig({
   provider: {
@@ -81,7 +81,7 @@ export default defineConfig({
 SSH
 
 ``` typescript
-import { defineConfig } from './src'
+import { defineConfig } from 'ossx-cli'
 
 export default defineConfig({
   provider: {
