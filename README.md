@@ -29,10 +29,8 @@ pnpm add -D ossx-cli
 
 ## 使用
 
-运行:
-
 ``` bash
-pnpm ossx
+npx ossx
 ```
 
 ### 创建配置
