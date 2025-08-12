@@ -19,21 +19,21 @@ export async function bootstrap(): Promise<void> {
     process.on('uncaughtException', errorHandler)
     process.on('unhandledRejection', errorHandler)
 
-    const { help, version, clean } = loadCliArgs()
+    const { help, version, clean, env } = loadCliArgs()
 
     if (help || version) {
       // Will be handled by cac, just need to exit
       process.exit(ExitCode.Success)
     }
 
-    const cfg = await loadOssConfig()
+    const cfg = await loadOssConfig({}, env ? path.isAbsolute(env) ? env : path.resolve(env) : process.cwd())
     const cwd = cfg.cwd || process.cwd()
 
     const logDir = path.isAbsolute(cfg.logDir!) ? cfg.logDir! : path.resolve(cwd, cfg.logDir!)
     if (clean && fs.existsSync(logDir)) {
       // Clean log directory
       fs.rmdirSync(logDir, { recursive: true })
-      console.log(`${ansis.bold.green('✔')} ${ansis.dim('Log directory cleand:')} ${ansis.bold.cyan(logDir)}`)
+      console.log(`${ansis.bold.green('✔')} ${ansis.dim('Log directory cleaned:')} ${ansis.bold.cyan(logDir)}`)
       process.exit(ExitCode.Success)
     }
 

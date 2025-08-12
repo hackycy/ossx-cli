@@ -8,6 +8,7 @@ export function loadCliArgs(argv = process.argv): Record<string, any> {
   cli
     .version(version)
     .option('--clean', 'Clean all log files', { default: false })
+    .option('-e, --env [env]', 'Specify the config file environment path')
     .help()
 
   const result = cli.parse(argv)

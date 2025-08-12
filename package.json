@@ -38,6 +38,7 @@
     "prepublishOnly": "nr build",
     "release": "bumpp",
     "ossx": "tsx src/cli-run.ts",
+    "ossx-env": "tsx src/cli-run.ts -e ./env",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
   },
