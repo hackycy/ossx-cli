@@ -76,11 +76,11 @@ export async function bootstrap(): Promise<void> {
           await cfg.onProgress(file, current, total, error)
         }
       },
-      onFinish: async (total, fail): Promise<void> => {
+      onFinish: async (total, failFiles): Promise<void> => {
         bar.stop()
 
         // Log task completion summary
-        logger?.logTaskCompletion(total, total - fail, fail)
+        logger?.logTaskCompletion(total, total - failFiles.length, failFiles.length)
 
         let summary = `  ${ansis.gray('•')}  ${ansis.dim('Provider:')} ${ansis.bold.white(cfg.provider.name)}`
           + `  ${ansis.dim('Target:')} ${ansis.bold.white(cfg.target)}`
@@ -93,14 +93,14 @@ export async function bootstrap(): Promise<void> {
         console.log()
         console.log(summary)
         console.log(`  ${ansis.gray('•')}  ${ansis.dim('Total files:')} ${ansis.bold.blue(total)}`)
-        console.log(`  ${ansis.gray('•')}  ${ansis.dim('Successfully uploaded:')} ${ansis.bold.green(total - fail)}`)
-        if (fail > 0) {
-          console.log(`  ${ansis.gray('•')}  ${ansis.dim('Failed uploads:')} ${ansis.bold.red(fail)}`)
+        console.log(`  ${ansis.gray('•')}  ${ansis.dim('Successfully uploaded:')} ${ansis.bold.green(total - failFiles.length)}`)
+        if (failFiles.length > 0) {
+          console.log(`  ${ansis.gray('•')}  ${ansis.dim('Failed uploads:')} ${ansis.bold.red(failFiles.length)}`)
         }
         console.log()
 
         if (isFunction(cfg.onFinish)) {
-          await cfg.onFinish(total, fail)
+          await cfg.onFinish(total, failFiles)
         }
       },
     })

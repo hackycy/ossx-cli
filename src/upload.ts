@@ -42,7 +42,7 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
     onlyFiles: true,
   })
 
-  let failCount = 0
+  const failFiles: OSSFile[] = []
 
   // network request
   const request = new Request()
@@ -122,7 +122,7 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
       catch (err) {
         uploadError = err
         if (attempt === maxRetry) {
-          failCount++
+          failFiles.push(file)
           if (options.abortOnFailure) {
             // Abort remaining uploads
             i = globFiles.length
@@ -150,7 +150,7 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
   // finished
   if (isFunction(options.onFinish)) {
     try {
-      await options.onFinish(globFiles.length, failCount)
+      await options.onFinish(globFiles.length, failFiles)
     }
     catch {
       // ignore

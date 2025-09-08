@@ -168,7 +168,7 @@ export interface OnStartOptions {
 export interface IUploadEvent {
   onStart?: (total: number, opt: OnStartOptions) => void | PromiseLike<void>
   onProgress?: (file: OSSFile, current: number, total: number, error?: unknown) => void | PromiseLike<void>
-  onFinish?: (total: number, fail: number) => void | PromiseLike<void>
+  onFinish?: (total: number, failFiles: OSSFile[]) => void | PromiseLike<void>
 }
 
 export interface OssOptions extends IUploadEvent {
