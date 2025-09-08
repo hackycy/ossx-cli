@@ -96,38 +96,58 @@ export async function uploadOSS(options: OssOptions): Promise<void> {
 
     let uploadError: unknown | undefined
 
-    // Upload the file using the provider's strategy
-    try {
-      await uploader.uploadFile({
-        file,
-        request,
-      })
+    // Upload the file using the provider's strategy with retry
+    const maxRetry = Number.isInteger(options.retryTimes) && (options.retryTimes as number) > 0 ? (options.retryTimes as number) : 0
+    let attempt = 0
+    while (attempt <= maxRetry) {
+      try {
+        await uploader.uploadFile({
+          file,
+          request,
+        })
 
-      if (options.removeWhenUploaded) {
-        try {
-          fs.rmSync(localFilePath, { force: true })
+        if (options.removeWhenUploaded) {
+          try {
+            fs.rmSync(localFilePath, { force: true })
+          }
+          catch {
+            // ignore
+          }
         }
-        catch {
-          // ignore
+
+        // success, break retry loop
+        uploadError = undefined
+        break
+      }
+      catch (err) {
+        uploadError = err
+        if (attempt === maxRetry) {
+          failCount++
+          if (options.abortOnFailure) {
+            // Abort remaining uploads
+            i = globFiles.length
+          }
+        }
+        else {
+          // small delay before retry to avoid hot loop; 100ms
+          await new Promise(r => setTimeout(r, 100))
         }
       }
+      attempt++
     }
-    catch (error) {
-      failCount++
-      uploadError = error
-    }
-    finally {
-      if (isFunction(options.onProgress)) {
-        try {
-          await options.onProgress(file, i + 1, globFiles.length, uploadError)
-        }
-        catch {
-          // ignore
-        }
+
+    // notify progress
+    if (isFunction(options.onProgress)) {
+      try {
+        await options.onProgress(file, i + 1, globFiles.length, uploadError)
+      }
+      catch {
+        // ignore
       }
     }
   }
 
+  // finished
   if (isFunction(options.onFinish)) {
     try {
       await options.onFinish(globFiles.length, failCount)

@@ -108,6 +108,7 @@ ossx -e ./env/prod
 | logger | `boolean` | `true` | 是否启用日志记录 |
 | logDir | `string` | `node_modules/.ossx` | 日志目录 (可相对 cwd) |
 | maxLogfiles | `number` | - | 最多保留日志文件数 (超出自动清理) |
+| retryTimes | `number` | - | 错误重试次数 |
 | onStart | `(total,{setRequestDefault})` | - | 上传开始回调，可注入请求默认值 |
 | onProgress | `(file,current,total,error?)` | - | 单文件完成回调，含错误 |
 | onFinish | `(total,fail)` | - | 全部结束回调 |
