@@ -9,6 +9,7 @@ const defaultOssOptions: Partial<OssOptions> = {
   abortOnFailure: false,
   logger: true,
   logDir: path.join('node_modules', '.ossx'),
+  retryTimes: 3,
   cwd: process.cwd(),
 }
 

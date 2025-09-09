@@ -221,7 +221,7 @@ export interface OssOptions extends IUploadEvent {
   /**
    * Additional retry attempts after the first failed attempt when uploading a file.
    * For example: retryTimes = 2 means each file can be tried up to 3 times (1 initial + 2 retries).
-   * @default 0
+   * @default 3
    */
   retryTimes?: number
 
