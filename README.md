@@ -5,7 +5,7 @@
 [![bundle][bundle-src]][bundle-href]
 [![License][license-src]][license-href]
 
-一个零依赖（运行时最小）且可扩展的多云/多方式上传 CLI：将本地构建产物一键上传到对象存储或服务器目录，用于前端/静态站点/资源文件自动化部署流程。
+将本地构建产物一键上传到对象存储或服务器目录，用于前端/静态站点/资源文件自动化部署流程。
 
 ![rec.gif](https://github.com/user-attachments/assets/853d7d3d-5085-4038-b4bd-4e7ffc23a0bc)
 
@@ -213,28 +213,6 @@ project
 ```bash
 ossx -e ./env/dev
 ossx -e ./env/prod
-```
-
-## 🧪 CI/CD 集成示例 (GitHub Actions)
-
-```yaml
-name: Upload
-on: [push]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm i
-      - run: pnpm build
-      - run: npx ossx -e ./env/prod
 ```
 
 ## ❓ FAQ
