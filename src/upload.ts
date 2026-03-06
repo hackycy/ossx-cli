@@ -91,7 +91,7 @@ export async function upload(configFile?: string): Promise<void> {
     return
   }
 
-  const targetDir = path.resolve(config.target)
+  const targetDir = path.resolve(config.cwd || process.cwd(), config.target)
 
   if (!fs.existsSync(targetDir)) {
     cancel(`Target directory does not exist: ${targetDir}`)

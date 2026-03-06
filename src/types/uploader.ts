@@ -43,6 +43,12 @@ export interface OssOptions {
   target?: string
 
   /**
+   * Current working directory for resolving paths, defaults to process.cwd()
+   * @default process.cwd()
+   */
+  cwd?: string
+
+  /**
    * Remote directory path where files will be uploaded from
    */
   destination?: string
