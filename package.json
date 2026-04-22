@@ -5,12 +5,12 @@
   "packageManager": "pnpm@10.28.1",
   "author": "hackycy <hackycy@outlook.com>",
   "license": "MIT",
-  "homepage": "https://github.com/hackycy-collection/ossx-cli#readme",
+  "homepage": "https://github.com/hackycy/ossx-cli#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hackycy-collection/ossx-cli.git"
+    "url": "git+https://github.com/hackycy/ossx-cli.git"
   },
-  "bugs": "https://github.com/hackycy-collection/ossx-cli/issues",
+  "bugs": "https://github.com/hackycy/ossx-cli/issues",
   "keywords": [],
   "sideEffects": false,
   "exports": {
