@@ -29,7 +29,7 @@ export interface OSSUploader {
   onDestroy?: () => PromiseLike<void> | void
 }
 
-export interface ProviderConfigItem {
+export interface ProviderConfigItem extends Partial<Pick<OssOptions, 'destination'>> {
   provider: Provider
   tag: string
 }

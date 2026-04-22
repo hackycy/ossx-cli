@@ -1,6 +1,6 @@
 import type { ProgressResult } from '@clack/prompts'
 import type { UserProviderConfig, UserProviderMultiConfig } from './config'
-import type { OSSFile, Provider, TaskResult, UploadOptions, WorkerMessage } from './types'
+import type { OSSFile, Provider, ProviderConfigItem, TaskResult, UploadOptions, WorkerMessage } from './types'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -33,16 +33,18 @@ export async function upload(configFile?: string): Promise<void> {
     provider = (config as UserProviderConfig).provider
   }
   else if (Reflect.has(config, 'providers')) {
+    let providerItem: ProviderConfigItem | undefined
+
     const providers = (config as UserProviderMultiConfig).providers
     if (providers.length === 1) {
-      provider = providers[0].provider
+      providerItem = providers[0]
     }
     else if (providers.length > 1) {
       // for ci
       if (process.env.OSSX_CI_PROVIDER_TAG) {
         const matched = providers.find(item => item.tag === process.env.OSSX_CI_PROVIDER_TAG)
         if (matched) {
-          provider = matched.provider
+          providerItem = matched
           log.step(`Using provider ${ansis.cyan.bold(matched.tag)} from environment variable ${ansis.gray('OSSX_CI_PROVIDER_TAG')}`)
         }
         else {
@@ -76,7 +78,16 @@ export async function upload(configFile?: string): Promise<void> {
           return
         }
 
-        provider = providers.find(item => item.tag === selected)?.provider
+        providerItem = providers.find(item => item.tag === selected)
+      }
+    }
+
+    if (providerItem) {
+      provider = providerItem.provider
+
+      // 如果 providerItem 中包含 destination 配置，则覆盖全局配置
+      if (providerItem.destination) {
+        config.destination = providerItem.destination
       }
     }
   }
