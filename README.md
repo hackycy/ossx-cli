@@ -14,7 +14,7 @@
 | 腾讯云 COS | ✅ | 临时签名（q-sign-*）PUT 上传 |
 | 七牛云 | ⏳ | 规划中 |
 | SSH | ✅ | 基于 `ssh2` / `node-ssh` 直接传输文件 |
-| FTP | ⏳ | 规划中 |
+| FTP | ✅ | 基于 `basic-ftp` 传输文件 |
 | 自定义 | ✅ | 提供 `upload(ctx)` 钩子自行实现 |
 
 ## 安装
@@ -44,6 +44,25 @@ export default defineConfig({
   ignoreFiles: ['*.zip', 'index.html'],
   destination: 'remote-path',
   maxLogfiles: 1,
+})
+```
+
+FTP 配置示例：
+
+```ts
+import { defineConfig } from 'ossx-cli'
+
+export default defineConfig({
+  provider: {
+    name: 'ftp',
+    host: 'ftp.example.com',
+    port: 21,
+    username: 'your-username',
+    password: 'your-password',
+    secure: false, // 或 true 启用 FTPS
+  },
+  target: 'dist',
+  destination: '/remote/path',
 })
 ```
 
