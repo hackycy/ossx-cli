@@ -12,6 +12,7 @@ import mime from 'mime-types'
 import { glob } from 'tinyglobby'
 import { loadConfigFromFile } from './config'
 import { Logger } from './logger'
+import { createUploader } from './providers'
 import { clearScreen, combineURLs } from './utils'
 
 /**
@@ -186,6 +187,22 @@ class UploadMaster {
   public async start(): Promise<void> {
     log.info(`Starting upload of ${ansis.green.bold(this.files.length)} files using ${ansis.yellowBright.bold(this.maxWorkers)} workers`)
     this.initialize()
+
+    // Run pre-upload hook (e.g. remote backup) before spawning workers
+    if (this.options.backup) {
+      const uploader = createUploader(this.options.provider, {
+        backup: this.options.backup,
+        maxBackups: this.options.maxBackups,
+      })
+      if (uploader.preUpload) {
+        log.step('Running pre-upload backup...')
+        await uploader.preUpload({
+          destination: this.options.destination,
+          backupDir: this.options.backupDir,
+        })
+        uploader.onDestroy?.()
+      }
+    }
 
     this.progressController.start(`Uploading files to ${ansis.cyan.bold(this.options.provider.name)}...`)
     await this.startWorkers()

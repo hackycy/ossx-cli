@@ -43,6 +43,7 @@
     "@clack/prompts": "catalog:cli",
     "ansis": "catalog:cli",
     "axios": "catalog:cli",
+    "basic-ftp": "^6.0.1",
     "cac": "catalog:cli",
     "mime-types": "catalog:cli",
     "node-ssh": "catalog:cli",

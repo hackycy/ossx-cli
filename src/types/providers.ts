@@ -119,6 +119,69 @@ export interface SSHProvider {
   [x: string]: any
 }
 
+export interface FTPProvider {
+  name: 'ftp'
+
+  /**
+   * Hostname or IP address of the FTP server
+   */
+  host: string
+
+  /**
+   * Port number of the FTP server
+   * @default 21
+   */
+  port?: number
+
+  /**
+   * Username for authentication
+   */
+  username?: string
+
+  /**
+   * Password for authentication
+   */
+  password?: string
+
+  /**
+   * Use FTPS (FTP over TLS)
+   * - false: plain FTP (default)
+   * - true or 'explicit': explicit FTPS via STARTTLS
+   * - 'implicit': implicit FTPS
+   * @default false
+   */
+  secure?: boolean | 'implicit'
+
+  /**
+   * TLS options passed to tls.connect (e.g. for self-signed certs)
+   */
+  secureOptions?: object
+
+  /**
+   * Use passive mode
+   * @default true
+   */
+  passive?: boolean
+
+  /**
+   * Connection timeout in milliseconds
+   * @default 30000
+   */
+  connTimeout?: number
+
+  /**
+   * PASV timeout in milliseconds
+   * @default 30000
+   */
+  pasvTimeout?: number
+
+  /**
+   * Keepalive interval in milliseconds
+   * @default 10000
+   */
+  keepalive?: number
+}
+
 /**
  * Custom provider implementation
  */
@@ -127,4 +190,4 @@ export interface CustomProvider {
   upload: OSSUploader['uploadFile']
 }
 
-export type Provider = AliyunOSSProvider | TencentCloudCOSProvider | SSHProvider | CustomProvider
+export type Provider = AliyunOSSProvider | TencentCloudCOSProvider | SSHProvider | FTPProvider | CustomProvider

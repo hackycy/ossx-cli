@@ -89,6 +89,8 @@ class UploadWorker {
         succeeded: this.files.length - failFiles.length,
       },
     })
+
+    uploader.onDestroy?.()
   }
 
   sendMessage(message: WorkerMessage): void {

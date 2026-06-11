@@ -17,6 +17,12 @@ export interface IUploadContext {
  */
 export interface OSSUploader {
   /**
+   * Optional hook called once before any uploads begin.
+   * Use for pre-upload operations like remote backup.
+   */
+  preUpload?: (ctx: { destination?: string, backupDir?: string }) => PromiseLike<void> | void
+
+  /**
    * Upload a single file to OSS
    * @param file file
    * @param options Additional upload options
@@ -110,4 +116,26 @@ export interface OssOptions {
    * @default os.cpus().length
    */
   maxWorkers?: number
+
+  /**
+   * Enable remote directory backup before upload (FTP provider only).
+   * Existing remote files are downloaded to a local temp directory,
+   * then re-uploaded to a timestamped backup subdirectory on the server.
+   * @default false
+   */
+  backup?: boolean
+
+  /**
+   * Subdirectory name under destination to store backups.
+   * Backups are organized as: <destination>/<backupDir>/<timestamp>/
+   * @default '.backups'
+   */
+  backupDir?: string
+
+  /**
+   * Maximum number of remote backups to keep.
+   * Only effective when backup is enabled.
+   * @default 5
+   */
+  maxBackups?: number
 }

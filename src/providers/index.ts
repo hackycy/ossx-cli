@@ -1,13 +1,21 @@
 import type { OSSUploader, Provider } from '../types'
 import { AliyunOSSUploader } from './aliyun'
 import { CustomUploader } from './custom'
+import { FTPUploader } from './ftp'
 import { SSHUploader } from './ssh'
 import { TencentCOSUploader } from './tencent'
 
-export function createUploader(provider: Provider): OSSUploader {
+export interface CreateUploaderOptions {
+  backup?: boolean
+  maxBackups?: number
+}
+
+export function createUploader(provider: Provider, options?: CreateUploaderOptions): OSSUploader {
   switch (provider.name) {
     case 'ssh':
       return new SSHUploader(provider)
+    case 'ftp':
+      return new FTPUploader(provider, options?.backup, options?.maxBackups)
     case 'custom':
       return new CustomUploader(provider)
     case 'aliyun-oss':
