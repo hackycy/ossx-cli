@@ -24,7 +24,7 @@ export class FTPUploader implements OSSUploader {
       user: this.provider.username,
       password: this.provider.password,
       secure: this.provider.secure ?? false,
-      secureOptions: this.provider.secureOptions as any,
+      secureOptions: this.provider.secureOptions,
     })
 
     this.connected = true
@@ -43,7 +43,7 @@ export class FTPUploader implements OSSUploader {
 
     await this.client.ensureDir(dir)
     this.createdDirs.add(dir)
-
+    // ensureDir changes cwd as a side effect, reset to root
     await this.client.cd('/')
   }
 
@@ -59,18 +59,11 @@ export class FTPUploader implements OSSUploader {
     const dest = this.toAbsolute(ctx.destination)
     const backupDirName = ctx.backupDir || '.backups'
 
-    // Check if destination directory exists
-    let destExists = false
+    // Check if destination directory exists by listing it
     try {
-      await this.client.cd(dest)
-      destExists = true
-      await this.client.cd('/')
+      await this.client.list(dest)
     }
     catch {
-      destExists = false
-    }
-
-    if (!destExists) {
       return
     }
 
@@ -89,7 +82,12 @@ export class FTPUploader implements OSSUploader {
         const localPath = path.join(tmpDir, relPath)
         fs.mkdirSync(path.dirname(localPath), { recursive: true })
         const writeStream = fs.createWriteStream(localPath)
-        await this.client.downloadTo(writeStream, `${dest}/${relPath}`)
+        try {
+          await this.client.downloadTo(writeStream, `${dest}/${relPath}`)
+        }
+        finally {
+          writeStream.destroy()
+        }
       }
 
       // Create remote backup directory and upload
@@ -121,23 +119,17 @@ export class FTPUploader implements OSSUploader {
    */
   private async listRemoteFiles(dir: string, excludeDir: string): Promise<string[]> {
     const results: string[] = []
-
-    await this.client.cd(dir)
-    const list = await this.client.list('.')
-    await this.client.cd('/')
+    const list = await this.client.list(dir)
 
     for (const item of list) {
-      // Skip the backup subdirectory and navigation entries
       if (item.name === '.' || item.name === '..' || item.name === excludeDir) {
         continue
       }
 
       if (item.type === 1) {
-        // file
         results.push(item.name)
       }
       else if (item.type === 2) {
-        // directory - recurse
         const subFiles = await this.listRemoteFiles(`${dir}/${item.name}`, excludeDir)
         for (const sub of subFiles) {
           results.push(`${item.name}/${sub}`)
@@ -150,9 +142,7 @@ export class FTPUploader implements OSSUploader {
 
   private async rotateBackups(backupParentDir: string): Promise<void> {
     try {
-      await this.client.cd(backupParentDir)
-      const list = await this.client.list('.')
-      await this.client.cd('/')
+      const list = await this.client.list(backupParentDir)
 
       const backups = list
         .filter(item => item.isDirectory && item.name !== '.' && item.name !== '..')
@@ -182,9 +172,18 @@ export class FTPUploader implements OSSUploader {
     const { file } = ctx
     const remotePath = this.toAbsolute(file.remoteFilePath)
 
-    await this.ensureDir(remotePath)
-
-    await this.client.uploadFrom(file.localFilePath, remotePath)
+    try {
+      await this.ensureDir(remotePath)
+      await this.client.uploadFrom(file.localFilePath, remotePath)
+    }
+    catch {
+      // Connection may have been lost, attempt reconnect and retry once
+      this.connected = false
+      await this.connect()
+      this.createdDirs.clear()
+      await this.ensureDir(remotePath)
+      await this.client.uploadFrom(file.localFilePath, remotePath)
+    }
   }
 
   onDestroy(): void {

@@ -1,4 +1,5 @@
 import type { Buffer } from 'node:buffer'
+import type { ConnectionOptions } from 'node:tls'
 import type { OSSUploader } from './uploader'
 
 export interface TencentCloudCOSProvider {
@@ -155,10 +156,11 @@ export interface FTPProvider {
   /**
    * TLS options passed to tls.connect (e.g. for self-signed certs)
    */
-  secureOptions?: object
+  secureOptions?: ConnectionOptions
 
   /**
-   * Use passive mode
+   * Use passive mode. Note: basic-ftp always uses passive mode,
+   * this option is reserved for future provider implementations.
    * @default true
    */
   passive?: boolean
@@ -170,13 +172,15 @@ export interface FTPProvider {
   connTimeout?: number
 
   /**
-   * PASV timeout in milliseconds
+   * PASV timeout in milliseconds. Note: basic-ftp uses a single timeout
+   * for all connections, configured via connTimeout.
    * @default 30000
    */
   pasvTimeout?: number
 
   /**
-   * Keepalive interval in milliseconds
+   * Keepalive interval in milliseconds. Note: not supported by basic-ftp,
+   * reserved for future provider implementations.
    * @default 10000
    */
   keepalive?: number
