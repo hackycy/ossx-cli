@@ -21,12 +21,18 @@ catalogs:
     axios:
       specifier: ^1.13.4
       version: 1.13.4
+    basic-ftp:
+      specifier: ^6.0.1
+      version: 6.0.1
     bumpp:
       specifier: ^10.3.1
       version: 10.3.1
     cac:
       specifier: ^6.7.14
       version: 6.7.14
+    cross-env:
+      specifier: ^10.1.0
+      version: 10.1.0
     eslint:
       specifier: ^9.39.1
       version: 9.39.1
@@ -87,7 +93,7 @@ importers:
         specifier: catalog:cli
         version: 1.13.4
       basic-ftp:
-        specifier: ^6.0.1
+        specifier: catalog:cli
         version: 6.0.1
       cac:
         specifier: catalog:cli
@@ -124,7 +130,7 @@ importers:
         specifier: catalog:cli
         version: 10.3.1
       cross-env:
-        specifier: ^10.1.0
+        specifier: catalog:cli
         version: 10.1.0
       eslint:
         specifier: catalog:cli
