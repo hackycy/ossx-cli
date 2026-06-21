@@ -1,0 +1,23 @@
+services:
+  ssh:
+    image: atmoz/sftp:alpine
+    command: test:test:1001::upload
+    ports:
+      - '2222:22'
+    volumes:
+      - ./.docker/sftp:/home/test/upload
+
+  ftp:
+    image: fauria/vsftpd
+    environment:
+      FTP_USER: test
+      FTP_PASS: test
+      PASV_ADDRESS: 127.0.0.1
+      PASV_MIN_PORT: 21100
+      PASV_MAX_PORT: 21110
+      LOG_STDOUT: YES
+    ports:
+      - '2121:21'
+      - '21100-21110:21100-21110'
+    volumes:
+      - ./.docker/ftp:/home/vsftpd/test

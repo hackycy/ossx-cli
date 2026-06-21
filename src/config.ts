@@ -9,6 +9,11 @@ export interface UserProviderConfig extends OssOptions {
 
 export interface UserProviderMultiConfig extends OssOptions {
   providers: ProviderConfigItem[]
+  /**
+   * Provider tags to execute sequentially. When omitted, ossx keeps the
+   * existing provider-selection behaviour.
+   */
+  pipeline?: string[]
 }
 
 export type UserConfig = UserProviderConfig | UserProviderMultiConfig
@@ -35,18 +40,22 @@ export async function loadConfigFromFile(configFile?: string): Promise<UserConfi
   const resolvedPath = configFile ? path.resolve(configFile) : undefined
   const extensions = ['ts', 'mts', 'cts', 'js', 'mjs', 'cjs', 'json']
 
+  if (resolvedPath) {
+    // Absolute paths resolve to the same file at every find-up level. Using
+    // merge mode would therefore load and merge that file repeatedly.
+    const { config } = await loadConfig<Partial<UserConfig>>({
+      cwd: process.cwd(),
+      sources: [{ files: resolvedPath, extensions: [''] }],
+      merge: false,
+    })
+    return { ...defaultOssOptions, ...config } as UserConfig
+  }
+
   const { config } = await loadConfig<Partial<UserConfig>>({
     cwd: process.cwd(),
-    sources: resolvedPath
-      ? [
-          { files: resolvedPath },
-        ]
-      : [
-          { files: 'ossx.config', extensions },
-        ],
+    sources: [{ files: 'ossx.config', extensions }],
     defaults: defaultOssOptions,
     merge: true,
   })
-
   return config as UserConfig
 }

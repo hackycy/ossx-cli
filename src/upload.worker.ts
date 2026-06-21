@@ -1,5 +1,4 @@
 import type { OSSFile, UploadOptions, WorkerMessage } from './types'
-import fs from 'node:fs'
 import process from 'node:process'
 import { isMainThread, parentPort, workerData } from 'node:worker_threads'
 import { createUploader } from './providers'
@@ -23,74 +22,60 @@ class UploadWorker {
 
   async start(): Promise<void> {
     const uploader = createUploader(this.options.provider)
-
-    // track failed files
     const failFiles: OSSFile[] = []
 
-    // upload files sequentially
-    for (let i = 0; i < this.files.length; i++) {
-      const file = this.files[i]
+    try {
+      // A worker handles its own queue sequentially. Parallelism is provided
+      // by UploadMaster creating multiple workers.
+      for (let i = 0; i < this.files.length; i++) {
+        const file = this.files[i]
+        const maxRetry = Number.isInteger(this.options.retryTimes) && (this.options.retryTimes as number) > 0 ? (this.options.retryTimes as number) : 0
+        let attempt = 0
+        let uploadError: unknown | undefined
 
-      // Upload the file using the provider's strategy with retry
-      const maxRetry = Number.isInteger(this.options.retryTimes) && (this.options.retryTimes as number) > 0 ? (this.options.retryTimes as number) : 0
-      let attempt = 0
-      let uploadError: unknown | undefined
-
-      while (attempt <= maxRetry) {
-        try {
-          await uploader.uploadFile({
-            file,
-          })
-
-          if (options.removeWhenUploaded) {
-            try {
-              fs.rmSync(file.localFilePath, { force: true })
-            }
-            catch {
-              // ignore
+        while (attempt <= maxRetry) {
+          try {
+            await uploader.uploadFile({ file })
+            uploadError = undefined
+            break
+          }
+          catch (error) {
+            uploadError = error
+            if (attempt < maxRetry) {
+              await new Promise(resolve => setTimeout(resolve, 100))
             }
           }
-
-          // success, break retry loop
-          uploadError = undefined
-          break
+          attempt++
         }
-        catch (err) {
-          uploadError = err
 
-          if (attempt === maxRetry) {
-            failFiles.push(file)
-          }
-          else {
-            // small delay before retry to avoid hot loop; 100ms
-            await new Promise(r => setTimeout(r, 100))
-          }
+        if (uploadError) {
+          failFiles.push(file)
         }
-        attempt++
+
+        this.sendMessage({
+          type: uploadError ? 'ERROR' : 'PROGRESS',
+          workerId: this.workerId,
+          error: uploadError,
+          progress: {
+            currentFile: file,
+            current: i + 1,
+            total: this.files.length,
+          },
+        })
       }
 
       this.sendMessage({
-        type: uploadError ? 'ERROR' : 'PROGRESS',
+        type: 'COMPLETE',
         workerId: this.workerId,
-        error: uploadError || undefined,
-        progress: {
-          currentFile: file,
-          current: i + 1,
+        result: {
           total: this.files.length,
+          succeeded: this.files.length - failFiles.length,
         },
       })
     }
-
-    this.sendMessage({
-      type: 'COMPLETE',
-      workerId: this.workerId,
-      result: {
-        total: this.files.length,
-        succeeded: this.files.length - failFiles.length,
-      },
-    })
-
-    uploader.onDestroy?.()
+    finally {
+      await uploader.onDestroy?.()
+    }
   }
 
   sendMessage(message: WorkerMessage): void {

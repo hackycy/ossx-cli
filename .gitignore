@@ -16,3 +16,4 @@ cache
 ossx.config.*
 ossx.*
 ossx-dist
+tests/.docker

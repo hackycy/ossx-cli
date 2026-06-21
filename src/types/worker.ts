@@ -14,6 +14,23 @@ export interface TaskResult {
   succeeded: number
 }
 
+export interface UploadTaskResult extends TaskResult {
+  failed: number
+  failedFiles: OSSFile[]
+}
+
+export interface PipelineStepResult extends UploadTaskResult {
+  tag: string
+  provider: Provider
+  elapsedMs: number
+}
+
+export interface PipelineResult {
+  succeeded: boolean
+  steps: PipelineStepResult[]
+  cleanupFailedFiles: string[]
+}
+
 // 工作进程消息类型
 export type WorkerMessageType = 'PROGRESS' | 'COMPLETE' | 'ERROR'
 

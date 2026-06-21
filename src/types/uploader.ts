@@ -35,7 +35,11 @@ export interface OSSUploader {
   onDestroy?: () => PromiseLike<void> | void
 }
 
-export interface ProviderConfigItem extends Partial<Pick<OssOptions, 'destination'>> {
+/**
+ * A named upload profile. Options declared here override the root options when
+ * this profile is selected or executed as part of a pipeline.
+ */
+export interface ProviderConfigItem extends Partial<OssOptions> {
   provider: Provider
   tag: string
 }

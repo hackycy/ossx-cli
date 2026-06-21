@@ -29,7 +29,10 @@ cli
   .option('-c, --config <file>', `[string] use specified config file`)
   .action(async (options: GlobalCLIOptions) => {
     const { upload } = await import('./upload')
-    await upload(options.config)
+    const result = await upload(options.config)
+    if (result && !result.succeeded) {
+      process.exitCode = 1
+    }
   })
 
 cli.help()

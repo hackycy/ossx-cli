@@ -35,7 +35,9 @@
     "lint": "eslint",
     "prepublishOnly": "nr build",
     "release": "bumpp",
-    "test": "node ./dist/cli.mjs",
+    "test": "pnpm test:unit",
+    "test:unit": "pnpm build && node --test tests/*.test.mjs",
+    "test:integration": "pnpm build && node tests/docker-pipeline.mjs",
     "typecheck": "tsc",
     "prepare": "simple-git-hooks"
   },

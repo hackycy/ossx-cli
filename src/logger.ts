@@ -1,4 +1,4 @@
-import type { UploadOptions } from './types'
+import type { PipelineStepResult, UploadOptions } from './types'
 import { Buffer } from 'node:buffer'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -12,13 +12,13 @@ export class Logger {
   private logDir: string
   private maxLogfiles?: number
 
-  constructor(logDir: string, cfg: UploadOptions) {
+  constructor(logDir: string, cfg: UploadOptions, taskTag?: string, runId?: string) {
     this.startTime = new Date()
     this.logDir = logDir
     this.maxLogfiles = cfg.maxLogfiles
     this.provider = cfg.provider
 
-    const logFileName = `ossx-${this.getLocalTimestamp(true)}.log`
+    const logFileName = `ossx-${runId || this.getLocalTimestamp(true)}.log`
     this.logFilePath = path.resolve(logDir, logFileName)
 
     // Ensure log directory exists
@@ -27,7 +27,7 @@ export class Logger {
     }
 
     // Create log file with initial header
-    let header = `OSS Upload Log - Started at ${this.getLocalTimestamp()}\n`
+    let header = `OSS Upload Log${taskTag ? ` - Step ${taskTag}` : ''} - Started at ${this.getLocalTimestamp()}\n`
 
     if (cfg.target) {
       header += `  Target Directory: ${cfg.target}\n`
@@ -42,10 +42,15 @@ export class Logger {
       if (key === 'name') {
         return
       }
-      header += `    ${key}: ${value || 'N/A'}\n`
+      header += `    ${key}: ${this.formatProviderValue(key, value)}\n`
     })
 
-    fs.writeFileSync(this.logFilePath, header.trim())
+    if (fs.existsSync(this.logFilePath)) {
+      fs.appendFileSync(this.logFilePath, `\n${header.trim()}`)
+    }
+    else {
+      fs.writeFileSync(this.logFilePath, header.trim())
+    }
     this.logSeparator()
 
     // Clean up old log files if maxLogfiles is specified
@@ -141,6 +146,23 @@ export class Logger {
     this.logSeparator()
   }
 
+  logPipelineCompletion(
+    plannedSteps: number,
+    results: PipelineStepResult[],
+    succeeded: boolean,
+    cleanupFailedFiles: string[],
+    elapsedMs: number,
+  ): void {
+    const logEntry = `OSS Pipeline - ${succeeded ? 'Complete' : 'Failed'} at ${this.getLocalTimestamp()}\n`
+      + `  Steps completed: ${results.length}/${plannedSteps}\n`
+      + `  Step results: ${results.map(result => `${result.tag}=${result.failed === 0 ? 'success' : 'failed'}`).join(', ') || 'N/A'}\n`
+      + `  Cleanup failures: ${cleanupFailedFiles.length}\n`
+      + `  Elapsed time: ${this.formatElapsedTime(elapsedMs)}`
+
+    fs.appendFileSync(this.logFilePath, logEntry)
+    this.logSeparator('=')
+  }
+
   /**
    * Formats elapsed time in milliseconds to human-readable format
    */
@@ -229,5 +251,17 @@ export class Logger {
 
   public getLogPath(): string {
     return this.logFilePath
+  }
+
+  private formatProviderValue(key: string, value: unknown): string {
+    if (/secret|password|privatekey|token/i.test(key)) {
+      return '[REDACTED]'
+    }
+
+    if (typeof value === 'function') {
+      return '[Function]'
+    }
+
+    return value === undefined || value === null || value === '' ? 'N/A' : String(value)
   }
 }
